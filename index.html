@@ -9,10 +9,12 @@
         <meta name="author" content="Colin Schoen">
         <link rel="icon" href="../../favicon.ico">
 
-        <title>Starter Template for Bootstrap</title>
+        <title>Ants Web GUI</title>
 
         <!-- Bootstrap core CSS -->
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Animate.css -->
+        <link href="assets/animate.css" rel="stylesheet">
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <!-- Custom styles for this template -->
@@ -40,7 +42,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Ants Web Viewer</a>
+                <img class="logo" src="assets/logo.png" /> <a class="navbar-brand" href="#">Ants Web GUI</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
@@ -50,11 +52,15 @@
         </div>
         </nav>
 
-        <div class="hero-header">
-            <div class="row" style="">
+        <div id="gameWrapper" class="game-wrapper" style="display: none;">
+            <h1>Hello</h1> 
+        </div>
+
+        <div id="hero-head" style="-webkit-animation-duration: 1.3s; -mov-animation-duration: 1.3s;" class="hero-header">
+            <div class="row" style="margin-right: 0px">
                 <div class="col-lg-12" style="margin-left: 120px; margin-top: 350px;">
-                    <h1><span class="header-text">Ants Web Viewer</span></h1>
-                    <p class="lead"><button class="btn btn-info">Play Ants <i class="fa fa-play fa-fw"></i></button></p>
+                    <h1 id="header-title"><span class="header-text">Ants Web Viewer</span></h1>
+                    <p class="lead"><button id="playBtn" class="btn btn-info">Play Ants <i class="fa fa-play fa-fw"></i></button></p>
                 </div>
             </div>
         </div>
@@ -71,5 +77,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"></script>
         <!-- Enchant.JS HTML5 Game Engine -->
         <script src="assets/enchant.js"></script>
+        <!-- Load our own JS file -->
+        <script src="assets/app.js"></script>
     </body>
 </html>

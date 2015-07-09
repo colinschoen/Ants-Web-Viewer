@@ -1,0 +1,1 @@
+var jsonLocation = "../gameState.json"
