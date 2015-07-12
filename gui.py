@@ -94,4 +94,13 @@ class GUI:
 
 @main
 def run(*args):
+    #Start webserver
+    import http.server 
+    import socketserver
+    import threading
+    PORT = 8000
+    Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("", PORT), Handler)
+    print("Web Server Started on port ", PORT)
+    threading.Thread(target=httpd.serve_forever).start()
     ants.start_with_strategy(args, GUI().strategy)

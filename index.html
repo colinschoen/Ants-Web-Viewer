@@ -43,6 +43,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <img class="logo" src="assets/logo.png" /> <a class="navbar-brand" href="#">Ants Web GUI</a>
+                <iframe class="fork-frame" src="https://ghbtns.com/github-btn.html?user=colinschoen&repo=Ants-Web-Viewer&type=fork&count=false&size=large" frameborder="0" scrolling="0" width="158px" height="30px"></iframe>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
@@ -53,7 +54,23 @@
         </nav>
 
         <div id="gameWrapper" class="game-wrapper" style="display: none;">
-            <h1>Hello</h1> 
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-5">
+                        <h3><button id="exitBtn" class="btn btn-danger exit-btn"><i class="fa fa-times fa-fw"></i> Exit GUI</button><span class="label label-warning">Food: <strong id="foodCount">1</strong></span> <span class="label label-warning">Time: <strong id="timeCount">0</strong></span></h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered ants-table">
+                                <tr id="antsTableRow">
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="hero-head" style="-webkit-animation-duration: 1.3s; -mov-animation-duration: 1.3s;" class="hero-header">
