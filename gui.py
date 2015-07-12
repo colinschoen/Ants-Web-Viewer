@@ -19,7 +19,7 @@ INSECT_FILES = {
        'Stun': ASSETS_DIR + INSECT_DIR +  "ant_stun.gif",
        'Ninja': ASSETS_DIR + INSECT_DIR +  "ant_ninja.gif",
        'Wall': ASSETS_DIR + INSECT_DIR +  "ant_wall.gif",
-       'Scuba': ASSETS_DIR + INSECT_DIR +  "scuba.gif",
+       'Scuba': ASSETS_DIR + INSECT_DIR +  "ant_scuba.gif",
        #TODO needs to be updated to laser ant art
        'Laser': ASSETS_DIR + INSECT_DIR +  "ant_harvester.gif",
        'Queen': ASSETS_DIR + INSECT_DIR +  "ant_queen.gif",
