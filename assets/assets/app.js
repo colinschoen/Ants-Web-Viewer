@@ -9,7 +9,7 @@ function GUI() {
     this.newState;
 }
 
-function drawControlPanel(food, ants) {
+function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
     for (var id in ants) {
         ant = ants[id];
@@ -28,7 +28,7 @@ function updateFoodCount() {
 function startGame() {
     gui = new GUI();
     gui.get_gameState();
-    drawControlPanel(gui.get_food(), gui.get_antTypes());
+    drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
 }
 
 
@@ -116,5 +116,6 @@ $('#exitBtn').on('click', function() {
         type: "warning",
         showConfirmButton: false,
         });
+    $.post("ajax/exit");
     $.post("ajax/exit");
 });

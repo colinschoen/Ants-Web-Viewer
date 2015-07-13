@@ -110,7 +110,7 @@ class GUI:
         #Add the Hive
         self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": [] }
         for bee in colony.hive.bees:
-            self.places[colony.hive.name]["insects"][bee]
+            self.places[colony.hive.name]["insects"] = bee
 
 
     def _update_control_panel(self, colony):
@@ -141,6 +141,11 @@ class HttpHandler(http.server.SimpleHTTPRequestHandler):
             response = json.dumps(action())
             self.wfile.write(response.encode('ascii'))
 
+import socketserver, socket
+class CustomThreadingTCPServer(socketserver.ThreadingTCPServer):
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind(self.server_address)
 
 @main
 def run(*args):
@@ -153,7 +158,7 @@ def run(*args):
     gui = GUI()
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("", PORT), HttpHandler)
+    httpd = CustomThreadingTCPServer(("", PORT), HttpHandler)
     print("Web Server Started on port ", PORT)
     def start_http():
         while gui.active:
