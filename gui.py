@@ -5,10 +5,7 @@ from ucb import *
 
 ASSETS_DIR = "assets/"
 INSECT_DIR = "insects/"
-GAME_STATE = "gameState.json"
-JSON_LOCATION = "gameState.json"
-MESSAGES = "gameMessages.json"
-MESSAGES_LOCATION = "gameMessages.json"
+STRATEGY_SECONDS = 3
 INSECT_FILES = {
        'Worker': ASSETS_DIR + INSECT_DIR +  "ant_harvester.gif",
        'Thrower': ASSETS_DIR + INSECT_DIR +  "ant_thrower.gif",
@@ -49,7 +46,8 @@ class GUI:
 
         self.colony = colony
         self.ant_type_selected = -1
-        self.ant_types = self.get_ant_types();
+        self.saveState("food", self.colony.food)
+        self.ant_types = self.get_ant_types()
         #Finally log that we are initialized
         self.initialized = True
 
@@ -57,7 +55,7 @@ class GUI:
         ant_types = {};
         i = 0
         for name, ant_type in self.colony.ant_types.items():
-            ant_types[i] = {"name": name, "img": self.get_insect_img_file(name)}
+            ant_types[i] = {"name": name, "cost": ant_type.food_cost, "img": self.get_insect_img_file(name)}
             i+= 1
 
         if not noSave:
@@ -81,6 +79,15 @@ class GUI:
         if not self.initialized:
             #No, so do that now
             self.initialize_colony_graphics(colony)
+        elapsed = 0 #Physical time elapsed this turn
+        #while elapsed < STRATEGY_SECONDS:
+        #    self._update_control_panel(colony)
+
+
+    def _update_control_panel(self, colony):
+        #TODO actually do something
+        return
+
 
 import http.server
 class HttpHandler(http.server.SimpleHTTPRequestHandler):

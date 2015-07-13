@@ -8,17 +8,21 @@ function GUI() {
     this.newState;
 }
 
-function drawControlPanel(ants) {
+function drawControlPanel(food, ants) {
     tr = $('#antsTableRow');
     for (var id in ants) {
         ant = ants[id];
-        tr.append('<td class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '</td>');
+        if (ant["cost"] > food)
+            tr.append('<td class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+        else
+            tr.append('<td class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
     }
 }
+
 function startGame() {
     var gui = new GUI();
     gui.get_gameState();
-    drawControlPanel(gui.get_antTypes());
+    drawControlPanel(gui.get_food(), gui.get_antTypes());
 }
 
 
@@ -45,6 +49,10 @@ GUI.prototype.updateState = function(s) {
 
 GUI.prototype.get_antTypes = function() {
     return this.newState["ant_types"];
+}
+
+GUI.prototype.get_food = function() {
+    return this.newState["food"];
 }
 
 $("#playBtn").on('click', function() {

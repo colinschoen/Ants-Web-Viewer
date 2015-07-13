@@ -51,4 +51,14 @@ body {
     right: 0px;
     top: 20px;
 }
-
+.ant-row-divider {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+.ant-cost {
+    width: 64px;
+    margin: 0 auto;
+}
+.ant-inactive {
+    opacity: 0.2
+}
