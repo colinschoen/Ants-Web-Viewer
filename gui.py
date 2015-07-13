@@ -117,7 +117,7 @@ class GUI:
             if not pRow in self.places:
                 self.places[pRow] = {}
             self.places[pRow][pCol] = { "type": "tunnel", "water": 0, "insects": {} } 
-            if name.find("water"):
+            if "water" in name:
                 self.places[pRow][pCol]["water"] = 1
         #Add the Hive
         self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": {} }

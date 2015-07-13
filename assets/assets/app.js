@@ -35,6 +35,8 @@ function drawInitialPlaces() {
         for (col in places[i]) {
             random_sky = Math.floor(Math.random() * 3) + 1;
             random_ground = Math.floor(Math.random() * 3) + 1;
+            if (places[i][col]["water"] == 1)
+                random_ground = "water";
             tr.append('<td class="places-td" id="pCol' + col + '"><div class="tunnel-div"><div style="background-image: url(\'assets/tiles/sky/' + random_sky + '.png\')"class="tunnel-goc-div"></div><div style="background-image: url(\'assets/tiles/ground/' + random_ground + '.png\')" class="tunnel-goc-div"></div></div></td>');
         }
         i += 1;
