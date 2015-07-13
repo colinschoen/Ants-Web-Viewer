@@ -16,7 +16,7 @@ function drawControlPanel(food, places, ants) {
         if (ant["cost"] > food)
             tr.append('<td data-disabled="1" data-name="' + ant["name"] + '" id="ant_' + ant["name"]  + '" class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
         else
-            tr.append('<td data-disabled="0" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+            tr.append('<td data-disabled="0" data-name="' + ant["name"] + '" id="ant_' + ant["name"] + '" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
     }
     updateFoodCount();
     drawInitialPlaces();
@@ -25,7 +25,6 @@ function drawControlPanel(food, places, ants) {
 function drawInitialPlaces() {
     pTable = $('.places-table');
     rows = gui.get_rows();
-    console.log(rows);
     places = gui.get_places();
     i = 0;
     tr = null;
@@ -43,7 +42,6 @@ function drawInitialPlaces() {
             rowspan = rows + 1
             tr.append('<td id="places-td" rowspan="' + rowspan + '" class="place-hive-td"></td>')
             td = tr.find('.place-hive-td');
-            console.log(places);
             for (bee in places["Hive"]["insects"]) {
                 td.append('<img class="bee-img" src="assets/insects/bee.gif">');
             }
