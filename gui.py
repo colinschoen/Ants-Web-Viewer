@@ -121,9 +121,10 @@ class GUI:
                 self.places[pRow][pCol]["water"] = 1
         #Add the Hive
         self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": {} }
+        self.places[colony.hive.name]["insects"] = []
         for bee in colony.hive.bees:
             self.insects.append(bee)
-            self.places[colony.hive.name]["insects"] = {"id": len(self.insects) - 1, "type": "bee"}
+            self.places[colony.hive.name]["insects"].append({"id": len(self.insects) - 1, "type": "bee"})
         self.saveState("rows", rows)
     
 

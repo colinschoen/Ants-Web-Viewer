@@ -41,8 +41,9 @@ function drawInitialPlaces() {
         }
         if (i == 0) {
             rowspan = rows + 1
-            tr.append('<td id="places-td" row-span="' + rowspan + '" class="place-hive-td"></td>')
+            tr.append('<td id="places-td" rowspan="' + rowspan + '" class="place-hive-td"></td>')
             td = tr.find('.place-hive-td');
+            console.log(places);
             for (bee in places["Hive"]["insects"]) {
                 td.append('<img class="bee-img" src="assets/insects/bee.gif">');
             }
