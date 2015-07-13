@@ -38,6 +38,7 @@ body {
 .ant-row {
     background-color: #FFFFFF;
     color: #000000;
+    cursor: pointer;
 }
 .ant-img {
     height: 64px;
@@ -61,4 +62,7 @@ body {
 }
 .ant-inactive {
     opacity: 0.2
+}
+.ant-selected {
+    background-color: #f0ad4e;
 }

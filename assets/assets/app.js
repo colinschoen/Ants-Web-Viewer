@@ -1,3 +1,4 @@
+var gui;
 $.ajaxSetup({
         async: false,
         cache: false,
@@ -13,14 +14,19 @@ function drawControlPanel(food, ants) {
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
-            tr.append('<td class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+            tr.append('<td data-disabled="1" data-name="' + ant["name"] + '" id="ant_' + ant["name"]  + '" class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
         else
-            tr.append('<td class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+            tr.append('<td data-disabled="0" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
     }
+    updateFoodCount();
+}
+
+function updateFoodCount() {
+    $('#foodCount').html(gui.get_food());
 }
 
 function startGame() {
-    var gui = new GUI();
+    gui = new GUI();
     gui.get_gameState();
     drawControlPanel(gui.get_food(), gui.get_antTypes());
 }
@@ -39,6 +45,14 @@ GUI.prototype.get_gameState = function() {
     $.post("ajax/fetch/state", function(state) {
         t.updateState(state);
         return state;
+    })
+    .fail(function(xhr, tStatus, e) {
+        swal({
+            title: "Error",
+            text: e,
+            type: "error",
+            showConfirmButton: false,
+            });
     });
 };
 
@@ -51,9 +65,38 @@ GUI.prototype.get_antTypes = function() {
     return this.newState["ant_types"];
 }
 
+GUI.prototype.get_places = function() {
+    return this.newState["places"];
+}
+
 GUI.prototype.get_food = function() {
     return this.newState["food"];
 }
+GUI.prototype.selectAnt = function(name) {
+    this.selected_ant = name;
+}
+GUI.prototype.get_selectedAnt = function() {
+    return this.selected_ant;
+}
+
+
+$('#antsTableRow').on('click', ".ant-row", function() {
+    if ($(this).attr('data-disabled') == 1) {
+        swal({
+            title: "Cannot Select " + $(this).attr('data-name') + " Ant",
+            text: "You do not have enough food.",
+            type: "error",
+        });
+        return false;
+    }
+    currentSelected = gui.get_selectedAnt();
+    if (currentSelected) {
+        $('#antsTableRow').find("[data-name = '" + currentSelected + "']").removeClass("ant-selected");
+    }
+    $(this).addClass('ant-selected');
+    gui.selectAnt($(this).attr('data-name'));
+});
+
 
 $("#playBtn").on('click', function() {
     $(this).addClass('animated fadeOutLeft');
@@ -67,6 +110,11 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
+    swal({
+        title: "Terminated",
+        text: "The Web GUI has been killed.",
+        type: "warning",
+        showConfirmButton: false,
+        });
     $.post("ajax/exit");
-    alert("GUI Exited");
 });

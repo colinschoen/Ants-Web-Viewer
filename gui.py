@@ -48,6 +48,8 @@ class GUI:
         self.ant_type_selected = -1
         self.saveState("food", self.colony.food)
         self.ant_types = self.get_ant_types()
+        self.places = self._init_places(colony)
+        self.saveState("places", self.places)
         #Finally log that we are initialized
         self.initialized = True
 
@@ -83,6 +85,33 @@ class GUI:
         #while elapsed < STRATEGY_SECONDS:
         #    self._update_control_panel(colony)
 
+    def _update_places(self, colony):
+        """Reflect the game state in the play area.
+
+        This function handles several aspects of the game:
+        - Adding Ant images for newly placed ants
+        - Moving Bee images for beets that have advanced
+        - Moving insects out of play when they hve expired
+        """
+        return
+
+    def _init_places(self, colony):
+        """Calculate all of our place data"""
+        self.places = {};
+        rows = 0
+        for name, place in colony.places.items():
+            if place.name == 'Hive':
+                continue
+            if place.exit.name == 'AntQueen':
+                rows += 1
+            self.places[name] = { "type": "tunnel", "water": 0, "insects": [] } 
+            if name.find("water"):
+                self.places[name]["water"] = 1
+        #Add the Hive
+        self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": [] }
+        for bee in colony.hive.bees:
+            self.places[colony.hive.name]["insects"][bee]
+
 
     def _update_control_panel(self, colony):
         #TODO actually do something
@@ -92,6 +121,9 @@ class GUI:
 import http.server
 class HttpHandler(http.server.SimpleHTTPRequestHandler):
     #Override the default do_POST method
+    def log_message(self, format, *args):
+        #I hate this console output so simply do nothing.
+        return
     def do_POST(self):
         path = self.path
         action = {
@@ -115,6 +147,7 @@ def run(*args):
     #Start webserver
     import socketserver
     import threading
+    import webbrowser
     PORT = 8000
     global gui
     gui = GUI()
@@ -127,4 +160,5 @@ def run(*args):
             httpd.handle_request()
         print("Web Server terminated")
     threading.Thread(target=start_http).start()
+    webbrowser.open("localhost:" + str(PORT), 2)
     ants.start_with_strategy(args, gui.strategy)
