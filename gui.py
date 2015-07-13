@@ -70,7 +70,7 @@ class GUI:
         with open(JSON_LOCATION) as f:
             data = json.load(f)
             if key:
-                return data["key"]
+                return data[key]
             return data
 
     def saveState(self, key, obj):
@@ -94,6 +94,11 @@ class GUI:
             #No, so do that now
             self.initialize_colony_graphics(colony)
 
+class HttpHandler(http.server.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        path = self.path
+        self.send_response(200)
+
 @main
 def run(*args):
     #Start webserver
@@ -101,8 +106,9 @@ def run(*args):
     import socketserver
     import threading
     PORT = 8000
-    Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("", PORT), Handler)
+    #Basic HTTP Handler
+    #Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("", PORT), HttpHandler)
     print("Web Server Started on port ", PORT)
     threading.Thread(target=httpd.serve_forever).start()
     ants.start_with_strategy(args, GUI().strategy)
