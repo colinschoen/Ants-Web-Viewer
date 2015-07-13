@@ -5,6 +5,7 @@ $.ajaxSetup({
 
 function GUI() {
     this.jsonLocation = "gameState.json";
+    this.jsonMessageLocation = "gameMessages.json";
     this.oldState;
     this.newState;
 }
@@ -40,7 +41,17 @@ GUI.prototype.get_gameState = function() {
         .fail(function(e) {
             alert("Error reading game state. " + e);
         });
+
 };
+
+GUI.prototype.getMessages = function() {
+    $.getJSON(this.jsonMessageLocation, function(s)     {
+        //TODO make our callbacks
+    });    
+}
+GUI.prototype.sendMessage = function(obj) {
+
+}
 
 GUI.prototype.updateState = function(s) {
     this.oldState = this.newState;
@@ -63,5 +74,7 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
-    
+    //Send a JSON message
+    //
+    //Update the GUI    
 });

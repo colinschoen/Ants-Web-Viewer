@@ -6,6 +6,8 @@ ASSETS_DIR = "assets/"
 INSECT_DIR = "insects/"
 GAME_STATE = "gameState.json"
 JSON_LOCATION = "gameState.json"
+MESSAGES = "gameMessages.json"
+MESSAGES_LOCATION = "gameMessages.json"
 INSECT_FILES = {
        'Worker': ASSETS_DIR + INSECT_DIR +  "ant_harvester.gif",
        'Thrower': ASSETS_DIR + INSECT_DIR +  "ant_thrower.gif",
