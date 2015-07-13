@@ -34,12 +34,16 @@ class GUI:
     """Browser based GUI that communicates with Python game engine"""
 
     def __init__(self):
+        self.active = True
         self.state = state.State()
         self.initialized = False
         self.colony = None
 
     def _init_control_panel(self, colony):
         return
+
+    def exit(self):
+        self.active = False
 
     def initialize_colony_graphics(self, colony):
 
@@ -85,15 +89,19 @@ class HttpHandler(http.server.SimpleHTTPRequestHandler):
         path = self.path
         action = {
                 '/ajax/fetch/state': gui.getState,
+                '/ajax/exit': gui.exit,
                 }.get(path) 
         if not action:
             #We could not find a valid route
             return
-        response = json.dumps(action())
+        response = action()
         self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(response.encode('ascii'))
+        if response:
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response = json.dumps(action())
+            self.wfile.write(response.encode('ascii'))
+
 
 @main
 def run(*args):
@@ -107,5 +115,9 @@ def run(*args):
     #Handler = http.server.SimpleHTTPRequestHandler
     httpd = socketserver.TCPServer(("", PORT), HttpHandler)
     print("Web Server Started on port ", PORT)
-    threading.Thread(target=httpd.serve_forever).start()
+    def start_http():
+        while gui.active:
+            httpd.handle_request()
+        print("Web Server terminated")
+    threading.Thread(target=start_http).start()
     ants.start_with_strategy(args, gui.strategy)

@@ -59,5 +59,6 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
-    
+    $.post("ajax/exit");
+    alert("GUI Exited");
 });
