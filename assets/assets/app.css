@@ -66,3 +66,20 @@ body {
 .ant-selected {
     background-color: #f0ad4e;
 }
+.tunnel-div {
+    height: 160px;
+    width: 80px;
+}
+.tunnel-goc-div {
+    height: 80px;
+    width: 80px;
+}
+.places-table {
+    float: none;
+    margin: 0 auto;
+    margin-top: 40px;
+    margin-bottom: 70px;
+}
+.places-td {
+    border: 1px solid #4a474a
+}

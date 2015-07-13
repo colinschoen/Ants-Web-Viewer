@@ -19,7 +19,28 @@ function drawControlPanel(food, places, ants) {
             tr.append('<td data-disabled="0" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
     }
     updateFoodCount();
+    drawInitialPlaces();
 }
+
+function drawInitialPlaces() {
+    pTable = $('.places-table');
+    rows = gui.get_rows();
+    console.log(rows);
+    places = gui.get_places();
+    i = 0;
+    tr = null;
+    while (i <= rows) {
+        pTable.append('<tr id="pRow' + i + '"></tr>');
+        tr = pTable.find('#pRow' + i);
+        for (col in places[i]) {
+            random_sky = Math.floor(Math.random() * 3) + 1;
+            random_ground = Math.floor(Math.random() * 3) + 1;
+            tr.append('<td class="places-td" id="pCol' + col + '"><div class="tunnel-div"><div style="background-image: url(\'assets/tiles/sky/' + random_sky + '.png\')"class="tunnel-goc-div"></div><div style="background-image: url(\'assets/tiles/ground/' + random_ground + '.png\')" class="tunnel-goc-div"></div></div></td>');
+        }
+        i += 1;
+    }
+}
+
 
 function updateFoodCount() {
     $('#foodCount').html(gui.get_food());
@@ -55,6 +76,10 @@ GUI.prototype.get_gameState = function() {
             });
     });
 };
+
+GUI.prototype.get_rows = function() {
+    return this.newState["rows"];
+}
 
 GUI.prototype.updateState = function(s) {
     this.oldState = this.newState;

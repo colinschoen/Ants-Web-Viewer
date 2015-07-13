@@ -35,6 +35,7 @@ class GUI:
         self.state = state.State()
         self.initialized = False
         self.colony = None
+        self.insects = []
 
     def _init_control_panel(self, colony):
         return
@@ -48,7 +49,7 @@ class GUI:
         self.ant_type_selected = -1
         self.saveState("food", self.colony.food)
         self.ant_types = self.get_ant_types()
-        self.places = self._init_places(colony)
+        self._init_places(colony)
         self.saveState("places", self.places)
         #Finally log that we are initialized
         self.initialized = True
@@ -95,22 +96,36 @@ class GUI:
         """
         return
 
+    def get_place_row(self, name):
+        return name.split("_")[1]
+
+    def get_place_column(self, name):
+        return name.split("_")[2]
+
     def _init_places(self, colony):
         """Calculate all of our place data"""
         self.places = {};
         rows = 0
+        cols = 0
         for name, place in colony.places.items():
             if place.name == 'Hive':
                 continue
+            pCol = self.get_place_column(name)
+            pRow = self.get_place_row(name)
             if place.exit.name == 'AntQueen':
                 rows += 1
-            self.places[name] = { "type": "tunnel", "water": 0, "insects": [] } 
+            if not pRow in self.places:
+                self.places[pRow] = {}
+            self.places[pRow][pCol] = { "type": "tunnel", "water": 0, "insects": {} } 
             if name.find("water"):
-                self.places[name]["water"] = 1
+                self.places[pRow][pCol]["water"] = 1
         #Add the Hive
-        self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": [] }
+        self.places[colony.hive.name] = { "type": "hive", "water": 0, "insects": {} }
         for bee in colony.hive.bees:
-            self.places[colony.hive.name]["insects"] = bee
+            self.insects.append(bee)
+            self.places[colony.hive.name]["insects"] = {"id": len(self.insects) - 1, "type": "bee"}
+        self.saveState("rows", rows)
+    
 
 
     def _update_control_panel(self, colony):
