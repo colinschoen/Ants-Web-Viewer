@@ -39,6 +39,15 @@ function drawInitialPlaces() {
                 random_ground = "water";
             tr.append('<td class="places-td" id="pCol' + col + '"><div class="tunnel-div"><div style="background-image: url(\'assets/tiles/sky/' + random_sky + '.png\')"class="tunnel-goc-div"></div><div style="background-image: url(\'assets/tiles/ground/' + random_ground + '.png\')" class="tunnel-goc-div"></div></div></td>');
         }
+        if (i == 0) {
+            rowspan = rows + 1
+            tr.append('<td id="places-td" row-span="' + rowspan + '" class="place-hive-td"></td>')
+            td = tr.find('.place-hive-td');
+            for (bee in places["Hive"]["insects"]) {
+                td.append('<img class="bee-img" src="assets/insects/bee.gif">');
+            }
+            pTable.find('.place-hive-td').html()
+        }
         i += 1;
     }
 }

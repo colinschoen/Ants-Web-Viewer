@@ -83,3 +83,7 @@ body {
 .places-td {
     border: 1px solid #4a474a
 }
+.bee-img {
+    width: 64px;
+    height: 64px;
+}
