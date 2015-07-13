@@ -4,7 +4,6 @@ $.ajaxSetup({
 });
 
 function GUI() {
-    this.jsonLocation = "gameState.json";
     this.oldState;
     this.newState;
 }
@@ -32,14 +31,12 @@ function dump(obj) {
 }
 
 GUI.prototype.get_gameState = function() {
-    //Read our JSON state file
-    gui = this;
-    $.getJSON(this.jsonLocation, function(s) {
-        gui.updateState(s);
-    })
-        .fail(function(e) {
-            alert("Error reading game state. " + e);
-        });
+    t = this;
+    $.post("ajax/fetch/state", function(state) {
+        t.updateState(state);
+        console.log(state);
+        return state;
+    });
 };
 
 GUI.prototype.updateState = function(s) {

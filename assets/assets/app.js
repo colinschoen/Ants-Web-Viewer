@@ -4,8 +4,6 @@ $.ajaxSetup({
 });
 
 function GUI() {
-    this.jsonLocation = "gameState.json";
-    this.jsonMessageLocation = "gameMessages.json";
     this.oldState;
     this.newState;
 }
@@ -33,25 +31,12 @@ function dump(obj) {
 }
 
 GUI.prototype.get_gameState = function() {
-    //Read our JSON state file
-    gui = this;
-    $.getJSON(this.jsonLocation, function(s) {
-        gui.updateState(s);
-    })
-        .fail(function(e) {
-            alert("Error reading game state. " + e);
-        });
-
+    t = this;
+    $.post("ajax/fetch/state", function(state) {
+        t.updateState(state);
+        return state;
+    });
 };
-
-GUI.prototype.getMessages = function() {
-    $.getJSON(this.jsonMessageLocation, function(s)     {
-        //TODO make our callbacks
-    });    
-}
-GUI.prototype.sendMessage = function(obj) {
-
-}
 
 GUI.prototype.updateState = function(s) {
     this.oldState = this.newState;
@@ -74,7 +59,5 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
-    //Send a JSON message
-    //
-    //Update the GUI    
+    
 });

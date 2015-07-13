@@ -1,4 +1,5 @@
 import ants
+import state
 import json #Need JSON to save game state
 from ucb import *
 
@@ -27,14 +28,13 @@ INSECT_FILES = {
        'Queen': ASSETS_DIR + INSECT_DIR +  "ant_queen.gif",
        'Bee': ASSETS_DIR + INSECT_DIR +  "bee.gif",
        #TODO implement remover
-} 
+}
 
 class GUI:
     """Browser based GUI that communicates with Python game engine"""
 
     def __init__(self):
-        #Create our JSON state file
-        self.createState()
+        self.state = state.State()
         self.initialized = False
         self.colony = None
 
@@ -63,29 +63,13 @@ class GUI:
     def get_insect_img_file(self, name):
         return INSECT_FILES[name]
 
-
-    
     def getState(self, key=None):
         """Get our message from JSON"""
-        with open(JSON_LOCATION) as f:
-            data = json.load(f)
-            if key:
-                return data[key]
-            return data
+        return self.state.getState()
 
-    def saveState(self, key, obj):
+    def saveState(self, key, val):
         """Saves our game object to JSON file"""
-        data = self.getState()
-        data[key] = obj
-        with open(JSON_LOCATION, 'w') as f:
-            json.dump(data, f)
-
-
-    def createState(self):
-        """Creates our start json state file"""
-        data = {}
-        with open(JSON_LOCATION, 'w') as f:
-            json.dump(data, f)
+        self.state.updateState(key, val)
 
     def strategy(self, colony):
         """The strategy function is called by ants.AntColony each turn"""
@@ -94,21 +78,34 @@ class GUI:
             #No, so do that now
             self.initialize_colony_graphics(colony)
 
+import http.server
 class HttpHandler(http.server.SimpleHTTPRequestHandler):
+    #Override the default do_POST method
     def do_POST(self):
         path = self.path
+        action = {
+                '/ajax/fetch/state': gui.getState,
+                }.get(path) 
+        if not action:
+            #We could not find a valid route
+            return
+        response = json.dumps(action())
         self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(response.encode('ascii'))
 
 @main
 def run(*args):
     #Start webserver
-    import http.server 
     import socketserver
     import threading
     PORT = 8000
+    global gui
+    gui = GUI()
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler
     httpd = socketserver.TCPServer(("", PORT), HttpHandler)
     print("Web Server Started on port ", PORT)
     threading.Thread(target=httpd.serve_forever).start()
-    ants.start_with_strategy(args, GUI().strategy)
+    ants.start_with_strategy(args, gui.strategy)
