@@ -1,3 +1,4 @@
+var gui;
 $.ajaxSetup({
         async: false,
         cache: false,
@@ -8,17 +9,57 @@ function GUI() {
     this.newState;
 }
 
-function drawControlPanel(ants) {
+function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
     for (var id in ants) {
         ant = ants[id];
-        tr.append('<td class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '</td>');
+        if (ant["cost"] > food)
+            tr.append('<td data-disabled="1" data-name="' + ant["name"] + '" id="ant_' + ant["name"]  + '" class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+        else
+            tr.append('<td data-disabled="0" data-name="' + ant["name"] + '" id="ant_' + ant["name"] + '" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+    }
+    updateFoodCount();
+    drawInitialPlaces();
+}
+
+function drawInitialPlaces() {
+    pTable = $('.places-table');
+    rows = gui.get_rows();
+    places = gui.get_places();
+    i = 0;
+    tr = null;
+    while (i <= rows) {
+        pTable.append('<tr id="pRow' + i + '"></tr>');
+        tr = pTable.find('#pRow' + i);
+        for (col in places[i]) {
+            random_sky = Math.floor(Math.random() * 3) + 1;
+            random_ground = Math.floor(Math.random() * 3) + 1;
+            if (places[i][col]["water"] == 1)
+                random_ground = "water";
+            tr.append('<td class="places-td" id="pCol' + col + '"><div class="tunnel-div"><div style="background-image: url(\'assets/tiles/sky/' + random_sky + '.png\')"class="tunnel-goc-div"></div><div style="background-image: url(\'assets/tiles/ground/' + random_ground + '.png\')" class="tunnel-goc-div"></div></div></td>');
+        }
+        if (i == 0) {
+            rowspan = rows + 1
+            tr.append('<td id="places-td" rowspan="' + rowspan + '" class="place-hive-td"></td>')
+            td = tr.find('.place-hive-td');
+            for (bee in places["Hive"]["insects"]) {
+                td.append('<img class="bee-img" src="assets/insects/bee.gif">');
+            }
+            pTable.find('.place-hive-td').html()
+        }
+        i += 1;
     }
 }
+
+
+function updateFoodCount() {
+    $('#foodCount').html(gui.get_food());
+}
+
 function startGame() {
-    var gui = new GUI();
+    gui = new GUI();
     gui.get_gameState();
-    drawControlPanel(gui.get_antTypes());
+    drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
 }
 
 
@@ -34,10 +75,21 @@ GUI.prototype.get_gameState = function() {
     t = this;
     $.post("ajax/fetch/state", function(state) {
         t.updateState(state);
-        console.log(state);
         return state;
+    })
+    .fail(function(xhr, tStatus, e) {
+        swal({
+            title: "Error",
+            text: e,
+            type: "error",
+            showConfirmButton: false,
+            });
     });
 };
+
+GUI.prototype.get_rows = function() {
+    return this.newState["rows"];
+}
 
 GUI.prototype.updateState = function(s) {
     this.oldState = this.newState;
@@ -47,6 +99,39 @@ GUI.prototype.updateState = function(s) {
 GUI.prototype.get_antTypes = function() {
     return this.newState["ant_types"];
 }
+
+GUI.prototype.get_places = function() {
+    return this.newState["places"];
+}
+
+GUI.prototype.get_food = function() {
+    return this.newState["food"];
+}
+GUI.prototype.selectAnt = function(name) {
+    this.selected_ant = name;
+}
+GUI.prototype.get_selectedAnt = function() {
+    return this.selected_ant;
+}
+
+
+$('#antsTableRow').on('click', ".ant-row", function() {
+    if ($(this).attr('data-disabled') == 1) {
+        swal({
+            title: "Cannot Select " + $(this).attr('data-name') + " Ant",
+            text: "You do not have enough food.",
+            type: "error",
+        });
+        return false;
+    }
+    currentSelected = gui.get_selectedAnt();
+    if (currentSelected) {
+        $('#antsTableRow').find("[data-name = '" + currentSelected + "']").removeClass("ant-selected");
+    }
+    $(this).addClass('ant-selected');
+    gui.selectAnt($(this).attr('data-name'));
+});
+
 
 $("#playBtn").on('click', function() {
     $(this).addClass('animated fadeOutLeft');
@@ -60,5 +145,12 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
-    
+    swal({
+        title: "Terminated",
+        text: "The Web GUI has been killed.",
+        type: "warning",
+        showConfirmButton: false,
+        });
+    $.post("ajax/exit");
+    $.post("ajax/exit");
 });

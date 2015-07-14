@@ -38,6 +38,7 @@ body {
 .ant-row {
     background-color: #FFFFFF;
     color: #000000;
+    cursor: pointer;
 }
 .ant-img {
     height: 64px;
@@ -51,4 +52,38 @@ body {
     right: 0px;
     top: 20px;
 }
-
+.ant-row-divider {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+.ant-cost {
+    width: 64px;
+    margin: 0 auto;
+}
+.ant-inactive {
+    opacity: 0.2
+}
+.ant-selected {
+    background-color: #f0ad4e;
+}
+.tunnel-div {
+    height: 160px;
+    width: 80px;
+}
+.tunnel-goc-div {
+    height: 80px;
+    width: 80px;
+}
+.places-table {
+    float: none;
+    margin: 0 auto;
+    margin-top: 40px;
+    margin-bottom: 70px;
+}
+.places-td {
+    border: 1px solid #4a474a
+}
+.bee-img {
+    width: 64px;
+    height: 64px;
+}
