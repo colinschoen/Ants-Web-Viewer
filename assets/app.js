@@ -9,14 +9,28 @@ function GUI() {
     this.newState;
 }
 
+function updateControlPanel() {
+    tr = $('#antsTableRow');
+    tr.find('td').each(function() {
+        name = $(this).attr('data-name');
+        cost = $(this).attr('data-cost');
+        disabled = $(this).attr('data-disabled');
+        if (disabled == 1 && gui.get_food() >= cost) {
+            $(this).attr("data-disabled", 0).removeClass("ant-inactive");
+        } 
+        else if (disabled == 0 && gui.get_food() < cost) {
+            $(this).attr("data-disabled", 1).addClass("ant-inactive");
+        }
+    });
+}
 function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
-            tr.append('<td data-disabled="1" data-img="' + ant["img"] + '" data-name="' + ant["name"] + '" id="ant_' + ant["name"]  + '" class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+            tr.append('<td data-disabled="1" data-cost="' + ant["cost"] + '" data-img="' + ant["img"] + '" data-name="' + ant["name"] + '" id="ant_' + ant["name"]  + '" class="ant-row ant-inactive"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
         else
-            tr.append('<td data-disabled="0" data-img="' + ant["img"] + '" data-name="' + ant["name"] + '" id="ant_' + ant["name"] + '" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
+            tr.append('<td data-disabled="0" data-cost="' + ant["cost"] + '" data-img="' + ant["img"] + '" data-name="' + ant["name"] + '" id="ant_' + ant["name"] + '" class="ant-row"><img class="ant-img" src="' + ant["img"] + '"> ' + ant["name"] + '<hr class="ant-row-divider" /><span class="badge ant-cost">' + ant["cost"] + '</span></td>');
     }
     updateFoodCount();
     drawInitialPlaces();
@@ -58,9 +72,11 @@ function updateFoodCount() {
 
 function startGame() {
     gui = new GUI();
+    gui.startGame();
     gui.get_gameState();
     drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
-    gui.update();
+    gui.strategyTime = gui.get_strategyTime();
+    gui.interval = setInterval(gui.update, 500);
 }
 
 
@@ -72,6 +88,16 @@ function dump(obj) {
     console.log(out);
 }
 
+GUI.prototype.startGame = function() {
+    $.ajax({
+        type: 'POST',
+        url: 'ajax/start/game',
+        async: false,
+    });
+}
+GUI.prototype.get_localGameState = function() {
+    return this.newState;
+}
 GUI.prototype.get_gameState = function() {
     t = this;
     $.post("ajax/fetch/state", function(state) {
@@ -120,6 +146,18 @@ GUI.prototype.deselectAnt = function() {
 }
 GUI.prototype.get_selectedAnt = function() {
     return this.selected_ant;
+}
+GUI.prototype.get_time = function() {
+    return this.newState["time"];
+}
+GUI.prototype.is_gameOver = function() {
+    return this.newState["gameOver"];
+}
+GUI.prototype.updateTime = function() {
+     $('#timeCount').html(this.get_time());
+}
+GUI.prototype.get_strategyTime = function() {
+    return this.newState["strategyTime"];
 }
 
 
@@ -205,8 +243,16 @@ $('.places-table').on('click', '.places-td', function() {
 });
 
 GUI.prototype.update = function() {
+    if (gui.is_gameOver()) {
+        clearInterval(this.interval);
+        return;
+    }
+    gui.get_gameState();
+    updateControlPanel();
+    gui.updateTime();
+    updateFoodCount();
     $('.active-ant').html("");
-    places = this.get_places();
+    places = gui.get_places();
     for (r in places) {
         if (r == "Hive") {
             continue;

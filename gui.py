@@ -1,6 +1,8 @@
 import ants
 import state
 import json #Need JSON to save game state
+import threading
+from time import sleep
 from ucb import *
 
 ASSETS_DIR = "assets/"
@@ -34,11 +36,19 @@ class GUI:
         self.active = True
         self.state = state.State()
         self.initialized = False
+        self.gameOver = False
         self.colony = None
         self.insects = []
 
-    def _init_control_panel(self, colony):
-        return
+
+    def newGameThread(self):
+        print("Trying to start new game")
+        ants.start_with_strategy(gui.args, gui.strategy)
+        self.gameOver = True
+
+    def startGame(self, data=None):
+        threading.Thread(target=self.newGameThread).start()
+        print("Game started")
 
     def exit(self, data=None):
         self.active = False
@@ -47,6 +57,7 @@ class GUI:
 
         self.colony = colony
         self.ant_type_selected = -1
+        self.saveState("strategyTime", STRATEGY_SECONDS)
         self.saveState("food", self.colony.food)
         self.ant_types = self.get_ant_types()
         self._init_places(colony)
@@ -83,8 +94,12 @@ class GUI:
             #No, so do that now
             self.initialize_colony_graphics(colony)
         elapsed = 0 #Physical time elapsed this turn
-        #while elapsed < STRATEGY_SECONDS:
-        #    self._update_control_panel(colony)
+        self.saveState("time", int(elapsed))
+        while elapsed < STRATEGY_SECONDS:
+            self.saveState("time", colony.time)
+            self._update_control_panel(colony)
+            sleep(0.25) 
+            elapsed += 0.25
 
     def _update_places(self, colony):
         """Reflect the game state in the play area.
@@ -128,19 +143,27 @@ class GUI:
         self.saveState("rows", rows)
     
 
+    def update_food(self):
+        self.saveState("food", self.colony.food)
 
     def _update_control_panel(self, colony):
         """Reflect the game state in the play area."""
-
+        self.update_food()
+        current_insects = []
         for name, place in colony.places.items():
+            current_insects += place.bees + [place.ant] 
             if place.name == 'Hive':
                 continue
 
+            pCol = self.get_place_column(name)
+            pRow = self.get_place_row(name)
             if place.ant is not None:
                 #Ok there is an ant that needs to be drawn here
-                pCol = self.get_place_column(name)
-                pRow = self.get_place_row(name)
                 self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)} }
+                if not place.ant in self.insects:
+                    #Add this ant to our internal list of insects
+                    self.insects.append(place.ant)
+            #Loop through our bees
             for bee in place.bees:
                 #Check to see if we are at an exit
                 for other_place in colony.places.values():
@@ -148,7 +171,13 @@ class GUI:
                         break
                 else:
                     other_place = colony.hive
-                    self.places[pRow][pCol][bee] = 1
+                    self.places[pRow][pCol]["bee"] = 1
+        #Remove expired insects
+        for insect in self.insects:
+            if insect not in current_insects: 
+                #TODO
+                #Ok this insect needs to be removed
+                x = "hi"
 
     def deployAnt(self, data):
         pname, ant = data["pname"], data["ant"]
@@ -182,6 +211,7 @@ class HttpHandler(http.server.SimpleHTTPRequestHandler):
         path = self.path
         action = {
                 '/ajax/fetch/state': gui.getState,
+                '/ajax/start/game': gui.startGame,
                 '/ajax/exit': gui.exit,
                 '/ajax/deploy/ant': gui.deployAnt,
                 }.get(path) 
@@ -213,11 +243,11 @@ class CustomThreadingTCPServer(socketserver.ThreadingTCPServer):
 def run(*args):
     #Start webserver
     import socketserver
-    import threading
     import webbrowser
     PORT = 8000
     global gui
     gui = GUI()
+    gui.args = args
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler
     httpd = CustomThreadingTCPServer(("", PORT), HttpHandler)
@@ -228,4 +258,3 @@ def run(*args):
         print("Web server terminated")
     threading.Thread(target=start_http).start()
     webbrowser.open("localhost:" + str(PORT), 2)
-    ants.start_with_strategy(args, gui.strategy)
