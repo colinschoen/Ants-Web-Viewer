@@ -70,6 +70,11 @@ body {
     height: 160px;
     width: 80px;
 }
+.tunnel-img-container {
+    margin-top: 40px;
+    margin-left: 10px;
+    position: absolute;
+}
 .tunnel-goc-div {
     height: 80px;
     width: 80px;
@@ -80,10 +85,15 @@ body {
     margin-top: 40px;
     margin-bottom: 70px;
 }
-.places-td {
-    border: 1px solid #4a474a
+.hive-td, .places-td {
+    cursor: pointer;
+    border: 1px solid #4a474a;
 }
 .bee-img {
+    width: 64px;
+    height: 64px;
+}
+.active-ant {
     width: 64px;
     height: 64px;
 }
