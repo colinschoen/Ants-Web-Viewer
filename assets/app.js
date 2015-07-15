@@ -79,15 +79,6 @@ function startGame() {
     gui.interval = setInterval(gui.update, 500);
 }
 
-
-function dump(obj) {
-    var out = '';
-    for (var i in obj) {
-        out += i + ": " + obj[i] + "\n";
-    }
-    console.log(out);
-}
-
 GUI.prototype.startGame = function() {
     $.ajax({
         type: 'POST',
@@ -114,6 +105,9 @@ GUI.prototype.get_gameState = function() {
     });
 };
 
+GUI.prototype.get_winner = function() {
+    return this.newState["winner"];
+}
 GUI.prototype.get_rows = function() {
     return this.newState["rows"];
 }
@@ -276,6 +270,22 @@ GUI.prototype.moveBees = function() {
 GUI.prototype.update = function() {
     if (gui.is_gameOver()) {
         clearInterval(this.interval);
+        if (gui.get_winner()) {
+            swal({
+                title: "Congratulations",
+                text: "You successfully defeated the bees!",
+                type: "success",
+                showConfirmButton: false,
+            });
+        }
+        else {
+            swal({
+                title: "Tough Luck",
+                text: "You lost and the bees live on.",
+                type: "warning",
+                showConfirmButton: false,
+            });
+        }
         return;
     }
     gui.get_gameState();

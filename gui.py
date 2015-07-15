@@ -46,9 +46,11 @@ class GUI:
 
     def newGameThread(self):
         print("Trying to start new game")
-        ants.start_with_strategy(gui.args, gui.strategy)
+        self.winner = ants.start_with_strategy(gui.args, gui.strategy)
         self.gameOver = True
-        #self.killGUI()
+        self.saveState("winner", self.winner)
+        self.saveState("gameOver", self.gameOver)
+        self.killGUI()
 
     def killGUI(self):
         self.active = False
