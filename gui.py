@@ -115,16 +115,6 @@ class GUI:
             sleep(0.25) 
             elapsed += 0.25
 
-    def _update_places(self, colony):
-        """Reflect the game state in the play area.
-
-        This function handles several aspects of the game:
-        - Adding Ant images for newly placed ants
-        - Moving Bee images for beets that have advanced
-        - Moving insects out of play when they have expired
-        """
-        return
-
     def get_place_row(self, name):
         return name.split("_")[1]
 
