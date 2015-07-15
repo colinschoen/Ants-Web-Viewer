@@ -57,7 +57,7 @@ function drawInitialPlaces() {
             tr.append('<td id="hive-td" rowspan="' + rowspan + '" class="place-hive-td"></td>')
             td = tr.find('.place-hive-td');
             for (bee in places["Hive"]["insects"]) {
-                td.append('<img class="bee-img" src="assets/insects/bee.gif">');
+                td.append('<img data-id="' + bee  + '" class="bee-img" src="assets/insects/bee.gif">');
             }
             pTable.find('.place-hive-td').html()
         }
@@ -137,6 +137,15 @@ GUI.prototype.get_food = function() {
 GUI.prototype.selectAnt = function(name, img) {
     this.selected_ant = { name: name, img: img };
 }
+GUI.prototype.get_beeToId = function() {
+    return this.newState["beeToId"];
+}
+GUI.prototype.get_beeLocations = function() {
+    return this.newState["beeLocations"];
+}
+GUI.prototype.get_oldBeeLocations = function() {
+    return this.oldState["beeLocations"];
+}
 GUI.prototype.deselectAnt = function() {
     currentSelected = this.get_selectedAnt();
     this.selected_ant = null;
@@ -192,6 +201,7 @@ $("#playBtn").on('click', function() {
 });
 
 $('#exitBtn').on('click', function() {
+    clearInterval(gui.interval);
     swal({
         title: "Terminated",
         text: "The Web GUI has been killed.",
@@ -242,6 +252,27 @@ $('.places-table').on('click', '.places-td', function() {
         });
 });
 
+GUI.prototype.moveBees = function() {
+    newLocation = this.get_beeLocations();
+    oldLocation = this.get_oldBeeLocations();
+    for (bee in oldLocation) {
+        if (oldLocation[bee] != newLocation[bee]) {
+            loc = $('.places-table').find('td[data-name="' + newLocation[bee]  + '"]');
+            //Get our bee image
+            console.log(bee);
+            img = $('.bee-img[data-id="' + bee  + '"]');
+            if (img.css("position") != "absolute")
+                $('.place-hive-td').css({width: $('.place-hive-td').width()});
+                console.log("converting to absolute position");
+                currentLocTop = img.position().top;
+                currentLocLeft = img.position().left;
+                img.css({"margin-top": "40px", "top": currentLocTop, "left": currentLocLeft, "position": "absolute"});
+            position = loc.position();
+            img.animate(position, 1000);
+        }
+    }
+}
+
 GUI.prototype.update = function() {
     if (gui.is_gameOver()) {
         clearInterval(this.interval);
@@ -251,6 +282,7 @@ GUI.prototype.update = function() {
     updateControlPanel();
     gui.updateTime();
     updateFoodCount();
+    gui.moveBees();
     $('.active-ant').html("");
     places = gui.get_places();
     for (r in places) {
@@ -259,7 +291,6 @@ GUI.prototype.update = function() {
         }
         for (c in places[r]) {
             if ("type" in places[r][c]["insects"]) {
-                console.log("Adding insect: " + places[r][c]["insects"]["name"]);
                 $('.places-table').find('.places-td[data-row="' + r  + '"][data-col="' + c  + '"]').find('.tunnel-img-container').html('<img class="active-ant" src="' + places[r][c]["insects"]["img"]  + '">');
             }
         }

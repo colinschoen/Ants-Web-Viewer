@@ -38,13 +38,20 @@ class GUI:
         self.initialized = False
         self.gameOver = False
         self.colony = None
+        self.currentBeeId = 0
         self.insects = []
+        self.beeToId = {}
+        self.beeLocations = {}
 
 
     def newGameThread(self):
         print("Trying to start new game")
         ants.start_with_strategy(gui.args, gui.strategy)
         self.gameOver = True
+        #self.killGUI()
+
+    def killGUI(self):
+        self.active = False
 
     def startGame(self, data=None):
         threading.Thread(target=self.newGameThread).start()
@@ -107,7 +114,7 @@ class GUI:
         This function handles several aspects of the game:
         - Adding Ant images for newly placed ants
         - Moving Bee images for beets that have advanced
-        - Moving insects out of play when they hve expired
+        - Moving insects out of play when they have expired
         """
         return
 
@@ -120,6 +127,7 @@ class GUI:
     def _init_places(self, colony):
         """Calculate all of our place data"""
         self.places = {};
+        self.images = { 'AntQueen': dict() }
         rows = 0
         cols = 0
         for name, place in colony.places.items():
@@ -134,12 +142,15 @@ class GUI:
             self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {} } 
             if "water" in name:
                 self.places[pRow][pCol]["water"] = 1
+            self.images[name] = dict()
         #Add the Hive
         self.places[colony.hive.name] = { "name": name, "type": "hive", "water": 0, "insects": {} }
         self.places[colony.hive.name]["insects"] = []
         for bee in colony.hive.bees:
             self.insects.append(bee)
-            self.places[colony.hive.name]["insects"].append({"id": len(self.insects) - 1, "type": "bee"})
+            self.places[colony.hive.name]["insects"].append({"id": self.currentBeeId, "type": "bee"})
+            self.beeToId[bee] = self.currentBeeId
+            self.currentBeeId += 1
         self.saveState("rows", rows)
     
 
@@ -165,13 +176,20 @@ class GUI:
                     self.insects.append(place.ant)
             #Loop through our bees
             for bee in place.bees:
+
+                self.beeLocations[self.beeToId[bee]] = name
                 #Check to see if we are at an exit
                 for other_place in colony.places.values():
                     if other_place.exit is place:
                         break
+                """
                 else:
                     other_place = colony.hive
                     self.places[pRow][pCol]["bee"] = 1
+                self.images[name][bee] = image
+                """
+        #Save our new bee locations to our game state
+        self.saveState("beeLocations", self.beeLocations)
         #Remove expired insects
         for insect in self.insects:
             if insect not in current_insects: 
