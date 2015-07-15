@@ -39,9 +39,12 @@ class GUI:
         self.gameOver = False
         self.colony = None
         self.currentBeeId = 0
+        self.currentInsectId = 0
         self.insects = []
         self.bees = []
         self.deadbees = []
+        self.deadinsects = []
+        self.insectToId = {}
         self.beeToId = {}
         self.beeLocations = {}
 
@@ -151,7 +154,6 @@ class GUI:
         self.places[colony.hive.name] = { "name": name, "type": "hive", "water": 0, "insects": {} }
         self.places[colony.hive.name]["insects"] = []
         for bee in colony.hive.bees:
-            self.insects.append(bee)
             self.places[colony.hive.name]["insects"].append({"id": self.currentBeeId, "type": "bee"})
             self.beeToId[bee] = self.currentBeeId
             self.currentBeeId += 1
@@ -164,27 +166,32 @@ class GUI:
     def _update_control_panel(self, colony):
         """Reflect the game state in the play area."""
         self.update_food()
-        current_insects = []
+        old_insects = self.insects[:]
         old_bees = self.bees[:]
-        self.bees = []
+        self.bees, self.insects = [], []
         for name, place in colony.places.items():
-            current_insects += place.bees + [place.ant] 
             if place.name == 'Hive':
                 continue
-
             pCol = self.get_place_column(name)
             pRow = self.get_place_row(name)
             if place.ant is not None:
                 #Ok there is an ant that needs to be drawn here
                 self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)} }
-                if not place.ant in self.insects:
+                if self.insectToId[place.ant] not in self.insects:
                     #Add this ant to our internal list of insects
-                    self.insects.append(place.ant)
+                    self.insects.append(self.insectToId[place.ant])
+            else:
+                self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {} }
             #Loop through our bees
             for bee in place.bees:
                 self.beeLocations[self.beeToId[bee]] = name
                 if self.beeToId[bee] not in self.bees:
                     self.bees.append(self.beeToId[bee])
+        #Any dead insects?
+        for i in old_insects:
+            if i not in self.insects and i not in self.deadinsects:
+                self.deadinsects.append(i)
+        self.saveState("deadinsects", self.deadinsects)
         #Any dead bees?
         for b in old_bees:
             if b not in self.bees and b not in self.deadbees:
@@ -192,25 +199,24 @@ class GUI:
         self.saveState("deadbees", self.deadbees)
         #Save our new bee locations to our game state
         self.saveState("beeLocations", self.beeLocations)
-        #Remove expired insects
-        for insect in self.insects:
-            if insect not in current_insects: 
-                #TODO
-                #Ok this insect needs to be removed
-                x = "hi"
 
     def deployAnt(self, data):
         pname, ant = data["pname"], data["ant"]
+        insect = None
         try:
             print("colony.deploy_ant('{0}', '{1}')".format(pname, ant))
-            self.colony.deploy_ant(pname, ant);
+            insect = self.colony.deploy_ant(pname, ant);
         except Exception as e:
             print(e)
             return { "error": str(e) }
+        if not insect:
+            return { "error" : "Unable to deploy ant" }
+        id = self.currentInsectId
+        self.insects.append(id)
+        self.insectToId[insect] = id
+        self.currentInsectId += 1
         self._update_control_panel(self.colony);
-        return { "success": 1 }
-
-
+        return { "success": 1, "id": id }
 
 import http.server
 import cgi
