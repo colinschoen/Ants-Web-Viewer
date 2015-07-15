@@ -7,6 +7,7 @@ $.ajaxSetup({
 function GUI() {
     this.oldState;
     this.newState;
+    this.deadbees = [];
 }
 
 function updateControlPanel() {
@@ -162,6 +163,9 @@ GUI.prototype.updateTime = function() {
 GUI.prototype.get_strategyTime = function() {
     return this.newState["strategyTime"];
 }
+GUI.prototype.get_deadbees = function() {
+    return this.newState["deadbees"];
+}
 
 
 
@@ -251,18 +255,25 @@ GUI.prototype.moveBees = function() {
     oldLocation = this.get_oldBeeLocations();
     for (bee in oldLocation) {
         if (oldLocation[bee] != newLocation[bee]) {
+            console.log(oldLocation);
+            console.log(newLocation);
             loc = $('.places-table').find('td[data-name="' + newLocation[bee]  + '"]');
-            //Get our bee image
-            console.log(bee);
             img = $('.bee-img[data-id="' + bee  + '"]');
-            if (img.css("position") != "absolute")
+            if (img.css("position") != "absolute") {
                 $('.place-hive-td').css({width: $('.place-hive-td').width()});
-                console.log("converting to absolute position");
                 currentLocTop = img.position().top;
                 currentLocLeft = img.position().left;
                 img.css({"margin-top": "40px", "top": currentLocTop, "left": currentLocLeft, "position": "absolute"});
+            }
             position = loc.position();
             img.animate(position, 1000);
+        }
+    }
+    for (b in this.get_deadbees()) {
+        if ($.inArray(b, this.deadbees) == -1) {
+            //We have some bee killing to do
+            img = $('.bee-img[data-id="' + b + '"]').hide("explode", {pieces: 16}, 1000);
+            this.deadbees.push(b);
         }
     }
 }

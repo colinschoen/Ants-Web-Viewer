@@ -40,6 +40,8 @@ class GUI:
         self.colony = None
         self.currentBeeId = 0
         self.insects = []
+        self.bees = []
+        self.deadbees = []
         self.beeToId = {}
         self.beeLocations = {}
 
@@ -163,6 +165,8 @@ class GUI:
         """Reflect the game state in the play area."""
         self.update_food()
         current_insects = []
+        old_bees = self.bees[:]
+        self.bees = []
         for name, place in colony.places.items():
             current_insects += place.bees + [place.ant] 
             if place.name == 'Hive':
@@ -178,18 +182,14 @@ class GUI:
                     self.insects.append(place.ant)
             #Loop through our bees
             for bee in place.bees:
-
                 self.beeLocations[self.beeToId[bee]] = name
-                #Check to see if we are at an exit
-                for other_place in colony.places.values():
-                    if other_place.exit is place:
-                        break
-                """
-                else:
-                    other_place = colony.hive
-                    self.places[pRow][pCol]["bee"] = 1
-                self.images[name][bee] = image
-                """
+                if self.beeToId[bee] not in self.bees:
+                    self.bees.append(self.beeToId[bee])
+        #Any dead bees?
+        for b in old_bees:
+            if b not in self.bees and b not in self.deadbees:
+                self.deadbees.append(b)
+        self.saveState("deadbees", self.deadbees)
         #Save our new bee locations to our game state
         self.saveState("beeLocations", self.beeLocations)
         #Remove expired insects
