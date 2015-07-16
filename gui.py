@@ -26,7 +26,7 @@ INSECT_FILES = {
        'Laser': ASSETS_DIR + INSECT_DIR +  "ant_harvester.gif",
        'Queen': ASSETS_DIR + INSECT_DIR +  "ant_queen.gif",
        'Bee': ASSETS_DIR + INSECT_DIR +  "bee.gif",
-       #TODO implement remover
+       'Remover': ASSETS_DIR + INSECT_DIR + "remove.png",
 }
 
 class GUI:
@@ -192,7 +192,14 @@ class GUI:
         self.saveState("beeLocations", self.beeLocations)
 
     def deployAnt(self, data):
+        #Check to see if the ant is a remover. If so we need to remove the ant in pname
         pname, ant = data["pname"], data["ant"]
+        if ant == "Remover":
+            existing_ant = self.colony.places[pname].ant
+            if existing_ant is not None:
+                print("colony.remove_ant('{0}')".format(pname))
+                self.colony.remove_ant(pname)
+            return
         insect = None
         try:
             print("colony.deploy_ant('{0}', '{1}')".format(pname, ant))

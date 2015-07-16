@@ -43,7 +43,6 @@ function drawInitialPlaces() {
     pTable = $('.places-table');
     rows = gui.get_rows();
     places = gui.get_places();
-    console.log(places);
     i = 0;
     tr = null;
     while (i <= rows) {
