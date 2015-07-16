@@ -148,6 +148,7 @@ class GUI:
             self.beeToId[bee] = self.currentBeeId
             self.currentBeeId += 1
         self.saveState("rows", rows)
+        self.saveState("places", self.places);
     
 
     def update_food(self):
@@ -166,12 +167,12 @@ class GUI:
             pRow = self.get_place_row(name)
             if place.ant is not None:
                 #Ok there is an ant that needs to be drawn here
-                self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)} }
+                self.places[pRow][pCol]["insects"] = {"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
                 if self.insectToId[place.ant] not in self.insects:
                     #Add this ant to our internal list of insects
                     self.insects.append(self.insectToId[place.ant])
             else:
-                self.places[pRow][pCol] = { "name": name, "type": "tunnel", "water": 0, "insects": {} }
+                self.places[pRow][pCol]["insects"] = {}
             #Loop through our bees
             for bee in place.bees:
                 self.beeLocations[self.beeToId[bee]] = name

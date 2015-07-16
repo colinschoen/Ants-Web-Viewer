@@ -43,6 +43,7 @@ function drawInitialPlaces() {
     pTable = $('.places-table');
     rows = gui.get_rows();
     places = gui.get_places();
+    console.log(places);
     i = 0;
     tr = null;
     while (i <= rows) {
@@ -51,8 +52,9 @@ function drawInitialPlaces() {
         for (col in places[i]) {
             random_sky = Math.floor(Math.random() * 3) + 1;
             random_ground = Math.floor(Math.random() * 3) + 1;
-            if (places[i][col]["water"] == 1)
+            if (places[i][col]["water"] == 1) {
                 random_ground = "water";
+            }
             tr.append('<td data-row="' + i  + '" data-col="' + col  + '" data-name="' + places[i][col]["name"]  + '" class="places-td" id="pCol' + col + '"><div class="tunnel-div"><div class="tunnel-img-container"></div><div style="background-image: url(\'assets/tiles/sky/' + random_sky + '.png\')"class="tunnel-goc-div"></div><div style="background-image: url(\'assets/tiles/ground/' + random_ground + '.png\')" class="tunnel-goc-div"></div></div></td>');
         }
         if (i == 0) {
