@@ -1,11 +1,17 @@
 import ants
 import utils
 import state
-import json #Need JSON to save game state
+import json
+import distutils.core
+import urllib.request
+import os
+import shutil
+import zipfile
 import threading
 from time import sleep
 from ucb import *
 
+VERSION = 1.0
 ASSETS_DIR = "assets/"
 INSECT_DIR = "insects/"
 STRATEGY_SECONDS = 3
@@ -60,6 +66,7 @@ class GUI:
         self.saveState("winner", self.winner)
         self.saveState("gameOver", self.gameOver)
         self.killGUI()
+        update()
 
     def killGUI(self):
         self.active = False
@@ -270,6 +277,65 @@ def removed_ant(self, rv, *args):
         if "id" in gui.places[r][c]["insects"]:
             gui.deadinsects.append(gui.places[r][c]["insects"]["id"])
             gui.saveState("deadinsects", gui.deadinsects)
+
+def update():
+    request = urllib.request.Request("https://api.github.com/repos/colinschoen/Ants-Web-Viewer/releases/latest")
+    data = None
+    print("Checking for updates...")
+    try:
+        response = urllib.request.urlopen(request)
+        data = json.loads(response.readall().decode('utf-8'))
+    except urllib.request.URLError as e:
+        print('Unable to check for updates')
+
+    if data:
+        release_version = float(data["name"])
+        if release_version > VERSION:
+            print("Local version of", VERSION, "is behind remote version of", release_version)
+            get_update(data["zipball_url"], data["name"])
+        else:
+            print("Local version of", VERSION, "is current with or ahead of remote version of", release_version)
+
+def get_update(url, version):
+    request = urllib.request.Request(url)
+    data = None
+    print("Downloading new version...")
+    try:
+        response = urllib.request.urlopen(request)
+        with open(version + ".zip", 'wb') as f:
+            f.write(response.read())
+        f = zipfile.ZipFile(version + ".zip")
+        f.extractall(version)
+        #Delete original archive
+        os.remove(version + ".zip")
+        os.chdir(version)
+        os.chdir(os.listdir()[0])
+        files = os.listdir()
+        dirs = []
+        for f in files:
+            #Skip hidden files and .md files
+            if f[0] == "." or f[-3:] == ".md":
+                continue
+            if os.path.isdir(f):
+                dirs.append(f)
+                continue
+            #Copy the files up two directories
+            shutil.copy(f, "../../" + f)
+        for d in dirs:
+            distutils.dir_util.copy_tree(d, "../../" + d)
+        #Delete our temp directory
+        os.chdir('../..')
+        print("Cleaning up...")
+        shutil.rmtree(version)
+        print("Update complete")
+
+
+    except Exception as e:
+        print("Error:", e)
+
+
+
+
 
 import socketserver, socket
 class CustomThreadingTCPServer(socketserver.ThreadingTCPServer):
