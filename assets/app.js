@@ -278,26 +278,27 @@ GUI.prototype.moveBees = function() {
             img.animate(position, 1000);
         }
     }
-    for (b in this.get_deadbees()) {
-        if ($.inArray(b, this.deadbees) == -1) {
+    db = this.get_deadbees();
+    for (b in db) {
+        if ($.inArray(db[b], this.deadbees) == -1) {
             //We have some bee killing to do
-            img = $('.bee-img[data-id="' + b + '"]').hide("explode", {pieces: 16}, 1000);
-            this.deadbees.push(b);
+            img = $('.bee-img[data-id="' + db[b] + '"]').hide("explode", {pieces: 16}, 1000);
+            this.deadbees.push(db[b]);
         }
     }
 }
 
 GUI.prototype.removeAnts = function() {
-    console.log("Dead Insects = :" + this.get_deadinsects())
-    for (a in this.get_deadinsects()) {
+    di = this.get_deadinsects();
+    for (a in di) {
         if ($.inArray(a, this.deadinsects) == -1) {
             //We have some ant killing to do lol -CS
-            img = $('.places-table').find('.active-ant[data-id="' + a + '"]').hide("explode", {pieces: 16}, 1000);
+            img = $('.places-table').find('.active-ant[data-id="' + di[a] + '"]').hide("explode", {pieces: 16}, 1000).hide();
             td = img.closest(".ant-td");
             r = td.attr("data-row");
             c = td.attr("data-col");
             
-            this.deadinsects.push(a);
+            this.deadinsects.push(di[a]);
         }
     }
 }

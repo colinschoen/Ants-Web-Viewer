@@ -1,5 +1,5 @@
 import ants
-import util
+import utils
 import state
 import json #Need JSON to save game state
 import threading
@@ -24,6 +24,7 @@ INSECT_FILES = {
        'Wall': ASSETS_DIR + INSECT_DIR +  "ant_wall.gif",
        'Scuba': ASSETS_DIR + INSECT_DIR +  "ant_scuba.gif",
        'Queen': ASSETS_DIR + INSECT_DIR +  "ant_queen.gif",
+       'Tank': ASSETS_DIR + INSECT_DIR + "ant_tank.gif",
        'Bee': ASSETS_DIR + INSECT_DIR +  "bee.gif",
        'Remover': ASSETS_DIR + INSECT_DIR + "remove.png",
 }
@@ -47,6 +48,10 @@ class GUI:
         self.beeToId = {}
         self.beeLocations = {}
 
+    def makeHooks(self):
+        ants.Insect.reduce_armor = utils.class_method_wrapper(ants.Insect.reduce_armor, dead_insects)
+        ants.AntColony.remove_ant = utils.class_method_wrapper(ants.AntColony.remove_ant, removed_ant)
+    
 
     def newGameThread(self):
         print("Trying to start new game")
@@ -154,6 +159,8 @@ class GUI:
     def update_food(self):
         self.saveState("food", self.colony.food)
 
+
+
     def _update_control_panel(self, colony):
         """Reflect the game state in the play area."""
         self.update_food()
@@ -166,11 +173,11 @@ class GUI:
             pCol = self.get_place_column(name)
             pRow = self.get_place_row(name)
             if place.ant is not None:
-                #Ok there is an ant that needs to be drawn here
-                self.places[pRow][pCol]["insects"] = {"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
                 if self.insectToId[place.ant] not in self.insects:
                     #Add this ant to our internal list of insects
                     self.insects.append(self.insectToId[place.ant])
+                #Ok there is an ant that needs to be drawn here
+                self.places[pRow][pCol]["insects"] = {"id": self.insectToId[place.ant],"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
             else:
                 self.places[pRow][pCol]["insects"] = {}
             #Loop through our bees
@@ -178,16 +185,6 @@ class GUI:
                 self.beeLocations[self.beeToId[bee]] = name
                 if self.beeToId[bee] not in self.bees:
                     self.bees.append(self.beeToId[bee])
-        #Any dead insects?
-        for i in old_insects:
-            if i not in self.insects and i not in self.deadinsects:
-                self.deadinsects.append(i)
-        self.saveState("deadinsects", self.deadinsects)
-        #Any dead bees?
-        for b in old_bees:
-            if b not in self.bees and b not in self.deadbees:
-                self.deadbees.append(b)
-        self.saveState("deadbees", self.deadbees)
         #Save our new bee locations to our game state
         self.saveState("beeLocations", self.beeLocations)
 
@@ -257,6 +254,23 @@ class HttpHandler(http.server.SimpleHTTPRequestHandler):
             response = json.dumps(response)
             self.wfile.write(response.encode('ascii'))
 
+def dead_insects(self, rv, *args):
+    if self.armor <= 0 and self:
+        print('{0} ran out of armor and expired'.format(self))
+        if self in gui.insectToId:
+            gui.deadinsects.append(gui.insectToId[self])
+            gui.saveState("deadinsects", gui.deadinsects)
+        elif self in gui.beeToId:
+            gui.deadbees.append(gui.beeToId[self])
+            gui.saveState("deadbees", gui.deadbees)
+def removed_ant(self, rv, *args):
+    r = gui.get_place_row(args[0])
+    c = gui.get_place_column(args[0])
+    if c in gui.places[r]:
+        if "id" in gui.places[r][c]["insects"]:
+            gui.deadinsects.append(gui.places[r][c]["insects"]["id"])
+            gui.saveState("deadinsects", gui.deadinsects)
+
 import socketserver, socket
 class CustomThreadingTCPServer(socketserver.ThreadingTCPServer):
     def server_bind(self):
@@ -271,6 +285,7 @@ def run(*args):
     PORT = 8000
     global gui
     gui = GUI()
+    gui.makeHooks()
     gui.args = args
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler
