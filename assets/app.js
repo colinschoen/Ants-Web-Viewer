@@ -28,6 +28,7 @@ function updateControlPanel() {
 }
 function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
+    console.log(ants);
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
@@ -287,6 +288,7 @@ GUI.prototype.moveBees = function() {
 }
 
 GUI.prototype.removeAnts = function() {
+    console.log("Dead Insects = :" + this.get_deadinsects())
     for (a in this.get_deadinsects()) {
         if ($.inArray(a, this.deadinsects) == -1) {
             //We have some ant killing to do lol -CS

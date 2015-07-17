@@ -80,11 +80,12 @@ class GUI:
         self.initialized = True
 
     def get_ant_types(self, noSave=False):
-        ant_types = {};
-        i = 0
+        ant_types = [];
         for name, ant_type in self.colony.ant_types.items():
-            ant_types[i] = {"name": name, "cost": ant_type.food_cost, "img": self.get_insect_img_file(name)}
-            i+= 1
+            ant_types.append({"name": name, "cost": ant_type.food_cost, "img": self.get_insect_img_file(name)})
+
+        #Sort by cost
+        ant_types.sort(key=lambda item: item["cost"])
 
         if not noSave:
             self.saveState("ant_types", ant_types)
