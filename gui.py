@@ -49,8 +49,8 @@ class GUI:
         self.beeLocations = {}
 
     def makeHooks(self):
-        ants.Insect.reduce_armor = utils.class_method_wrapper(ants.Insect.reduce_armor, dead_insects)
-        ants.AntColony.remove_ant = utils.class_method_wrapper(ants.AntColony.remove_ant, removed_ant)
+        ants.Insect.reduce_armor = utils.class_method_wrapper(ants.Insect.reduce_armor, post=dead_insects)
+        ants.AntColony.remove_ant = utils.class_method_wrapper(ants.AntColony.remove_ant, post=removed_ant)
     
 
     def newGameThread(self):
@@ -296,4 +296,9 @@ def run(*args):
             httpd.handle_request()
         print("Web server terminated")
     threading.Thread(target=start_http).start()
-    webbrowser.open("localhost:" + str(PORT), 2)
+    try:
+        webbrowser.open("http://localhost:" + str(PORT), 2)
+    except Exception:
+        print("Unable to automatically open web browser.")
+        print("Point your browser to http://localhost:" + str(PORT))
+
