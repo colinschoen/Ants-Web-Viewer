@@ -363,8 +363,8 @@ def run(*args):
         print("Web server terminated")
     threading.Thread(target=start_http).start()
     try:
-        webbrowser.open("http://localhost:" + str(PORT), 2)
+        webbrowser.open("http://localhost:" + str(PORT) + '/gui.html', 2)
     except Exception:
         print("Unable to automatically open web browser.")
-        print("Point your browser to http://localhost:" + str(PORT))
+        print("Point your browser to http://localhost:" + str(PORT) + '/gui.html')
 
