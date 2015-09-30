@@ -1,8 +1,4 @@
-try:
-    import ants
-except(ImportError):
-    print("ERROR: ants.py project file not found in current working directory.")
-    raise SystemExit
+import ants
 import utils
 import state
 import json
