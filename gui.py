@@ -15,7 +15,7 @@ import threading
 from time import sleep
 from ucb import *
 
-VERSION = 1.1
+VERSION = 1.2
 ASSETS_DIR = "assets/"
 INSECT_DIR = "insects/"
 STRATEGY_SECONDS = 3
