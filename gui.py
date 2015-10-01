@@ -11,9 +11,10 @@ import threading
 from time import sleep
 from ucb import *
 
-VERSION = 1.2
+VERSION = 1.1
 ASSETS_DIR = "assets/"
 INSECT_DIR = "insects/"
+LEAVES_DIR = "leaves/"
 STRATEGY_SECONDS = 3
 INSECT_FILES = {
        'Worker': ASSETS_DIR + INSECT_DIR +  "ant_harvester.gif",
@@ -34,6 +35,16 @@ INSECT_FILES = {
        'Bee': ASSETS_DIR + INSECT_DIR +  "bee.gif",
        'Remover': ASSETS_DIR + INSECT_DIR + "remove.png",
 }
+LEAF_FILES = {
+        'Thrower': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif',
+        'Short': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif',
+        'Long': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif',
+        'Slow': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal2.gif',
+        'Stun': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif',
+        'Scuba': ASSETS_DIR + LEAVES_DIR + 'Leaf_Water.gif',
+        'Queen': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif',
+        'Laser': ASSETS_DIR + LEAVES_DIR + 'Leaf_Normal.gif'
+        }
 
 class GUI:
     """Browser based GUI that communicates with Python game engine"""
@@ -53,6 +64,7 @@ class GUI:
         self.insectToId = {}
         self.beeToId = {}
         self.beeLocations = {}
+        self.throwAt = {}
 
     def makeHooks(self):
         ants.Insect.reduce_armor = utils.class_method_wrapper(ants.Insect.reduce_armor, post=dead_insects)
@@ -121,11 +133,26 @@ class GUI:
             self.initialize_colony_graphics(colony)
         elapsed = 0 #Physical time elapsed this turn
         self.saveState("time", int(elapsed))
+        #Clear out our throw at dictionary at the beginning of each turn
+        self.throwAt = {}
         while elapsed < STRATEGY_SECONDS:
             self.saveState("time", colony.time)
             self._update_control_panel(colony)
             sleep(0.25) 
             elapsed += 0.25
+        #Check to see if we need to throw any leaves at the end of the turn
+        self.throwLeaves(colony)
+
+    def throwLeaves(self, colony):
+        has_ant = lambda a: hasattr(a, 'ant') and a.ant
+        for ant in colony.ants + [a.ant for a in colony.ants if has_ant(a)]:
+            if ant.name in LEAF_FILES:
+                bee = ant.nearest_bee(colony.hive)
+                if bee is not None:
+                    self.throwAt[self.insectToId[ant]] = self.beeToId[bee] 
+        self.saveState("throwAt", self.throwAt)
+
+    
 
     def get_place_row(self, name):
         return name.split("_")[1]

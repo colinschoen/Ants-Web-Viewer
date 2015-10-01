@@ -28,6 +28,7 @@ function updateControlPanel() {
 }
 function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
+    console.log(ants);
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
@@ -68,7 +69,6 @@ function drawInitialPlaces() {
         i += 1;
     }
 }
-
 
 function updateFoodCount() {
     $('#foodCount').html(gui.get_food());
@@ -114,6 +114,10 @@ GUI.prototype.get_winner = function() {
 }
 GUI.prototype.get_rows = function() {
     return this.newState["rows"];
+}
+
+GUI.prototype.get_throwAt = function() {
+    return this.newState["throwAt"];
 }
 
 GUI.prototype.updateState = function(s) {
@@ -262,10 +266,9 @@ $('.places-table').on('click', '.places-td', function() {
 
 GUI.prototype.moveBees = function() {
     newLocation = this.get_beeLocations();
-    //Debug
     oldLocation = this.get_oldBeeLocations();
-    for (bee in newLocation) {
-        if (!(bee in oldLocation) || oldLocation[bee] != newLocation[bee]) {
+    for (bee in oldLocation) {
+        if (oldLocation[bee] != newLocation[bee]) {
             loc = $('.places-table').find('td[data-name="' + newLocation[bee]  + '"]');
             img = $('.bee-img[data-id="' + bee  + '"]');
             if (img.css("position") != "absolute") {
@@ -301,6 +304,8 @@ GUI.prototype.removeAnts = function() {
             this.deadinsects.push(di[a]);
         }
     }
+}
+GUI.prototype.throwAt = function(bees) {
 }
 GUI.prototype.update = function() {
     if (gui.is_gameOver()) {
@@ -339,6 +344,8 @@ GUI.prototype.update = function() {
             if ("type" in places[r][c]["insects"]) {
                 $('.places-table').find('.places-td[data-row="' + r  + '"][data-col="' + c  + '"]').find('.tunnel-img-container').html('<img data-id="' + gui.locToAnt[r][c]  + '" class="active-ant" src="' + places[r][c]["insects"]["img"]  + '">');
             }
+            //Debug
+            //insects = this.get_throwAt();
         }
     }
 }
