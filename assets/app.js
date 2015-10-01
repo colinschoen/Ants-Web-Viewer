@@ -267,8 +267,8 @@ $('.places-table').on('click', '.places-td', function() {
 GUI.prototype.moveBees = function() {
     newLocation = this.get_beeLocations();
     oldLocation = this.get_oldBeeLocations();
-    for (bee in oldLocation) {
-        if (oldLocation[bee] != newLocation[bee]) {
+    for (bee in newLocation) {
+        if (!(bee in oldLocation) || oldLocation[bee] != newLocation[bee]) {
             loc = $('.places-table').find('td[data-name="' + newLocation[bee]  + '"]');
             img = $('.bee-img[data-id="' + bee  + '"]');
             if (img.css("position") != "absolute") {
