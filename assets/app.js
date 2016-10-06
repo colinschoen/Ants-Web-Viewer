@@ -81,7 +81,8 @@ function startGame() {
     gui.get_gameState();
     drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
     gui.strategyTime = gui.get_strategyTime();
-    gui.interval = setInterval(gui.update, 500);
+    gui.interval = setInterval(gui.update.bind(gui), 500);
+    console.log(gui.interval)
 }
 
 GUI.prototype.startGame = function() {
@@ -304,6 +305,7 @@ GUI.prototype.removeAnts = function() {
 }
 GUI.prototype.update = function() {
     if (gui.is_gameOver()) {
+        console.log("called once");
         clearInterval(this.interval);
         if (gui.get_winner()) {
             swal({
@@ -318,8 +320,12 @@ GUI.prototype.update = function() {
                 title: "Tough Luck",
                 text: "You lost and the bees live on.",
                 type: "warning",
-                showConfirmButton: false,
-            });
+                // showConfirmButton: true,
+                confirmButtonColor: "#0b752b",
+                confirmButtonText: "Restart?"
+            },
+              startGame
+            );
         }
         return;
     }
