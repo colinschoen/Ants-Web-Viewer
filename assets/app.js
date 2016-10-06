@@ -218,13 +218,13 @@ $("#playBtn").on('click', function() {
 
 $('#exitBtn').on('click', function() {
     clearInterval(gui.interval);
+    $.post("ajax/exit");
     swal({
         title: "Terminated",
         text: "The Web GUI has been killed.",
         type: "warning",
         showConfirmButton: false,
         });
-    $.post("ajax/exit");
 });
 
 $('.places-table').on('click', '.places-td', function() {
