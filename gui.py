@@ -8,6 +8,7 @@ import os
 import shutil
 import zipfile
 import threading
+import importlib
 from time import sleep
 from ucb import *
 
@@ -61,11 +62,13 @@ class GUI:
 
     def newGameThread(self):
         print("Trying to start new game")
+        self.__init__() # resets GUI state
+        importlib.reload(ants) # resets ants, e.g. with newly implemented Ants
         self.winner = ants.start_with_strategy(gui.args, gui.strategy)
         self.gameOver = True
         self.saveState("winner", self.winner)
         self.saveState("gameOver", self.gameOver)
-        self.killGUI()
+        # self.killGUI()
         update()
 
     def killGUI(self):
@@ -284,8 +287,6 @@ def update():
     print("Checking for updates...")
     try:
         response = urllib.request.urlopen(request)
-        # TODO: remove the line below when verified
-        # data = json.loads(response.readall().decode('utf-8'))
         data = json.loads(response.read().decode('utf-8'))
     except urllib.request.URLError as e:
         print('Unable to check for updates')

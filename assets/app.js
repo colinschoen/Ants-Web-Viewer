@@ -82,7 +82,6 @@ function startGame() {
     drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
     gui.strategyTime = gui.get_strategyTime();
     gui.interval = setInterval(gui.update.bind(gui), 500);
-    console.log(gui.interval)
 }
 
 GUI.prototype.startGame = function() {
@@ -174,7 +173,18 @@ GUI.prototype.get_deadbees = function() {
 GUI.prototype.get_deadinsects = function() {
     return this.newState["deadinsects"];
 }
+GUI.prototype.clearBoard = function(){
+  $(".places-table > tbody").empty();
+}
+GUI.prototype.clearAntTypes = function(){
+  $("#antsTableRow").empty();
+}
 
+GUI.prototype.restartGame = function(){
+  this.clearBoard();
+  this.clearAntTypes();
+  startGame();
+}
 
 
 $('#antsTableRow').on('click', ".ant-row", function() {
@@ -214,7 +224,6 @@ $('#exitBtn').on('click', function() {
         type: "warning",
         showConfirmButton: false,
         });
-    $.post("ajax/exit");
     $.post("ajax/exit");
 });
 
@@ -305,26 +314,26 @@ GUI.prototype.removeAnts = function() {
 }
 GUI.prototype.update = function() {
     if (gui.is_gameOver()) {
-        console.log("called once");
         clearInterval(this.interval);
         if (gui.get_winner()) {
             swal({
                 title: "Congratulations",
                 text: "You successfully defeated the bees!",
                 type: "success",
-                showConfirmButton: false,
-            });
-        }
-        else {
+                confirmButtonColor: "#0b752b",
+                confirmButtonText: "Restart?"
+              },
+              this.restartGame.bind(this)
+            );
+        } else {
             swal({
                 title: "Tough Luck",
                 text: "You lost and the bees live on.",
                 type: "warning",
-                // showConfirmButton: true,
                 confirmButtonColor: "#0b752b",
                 confirmButtonText: "Restart?"
-            },
-              startGame
+              },
+              this.restartGame.bind(this)
             );
         }
         return;
