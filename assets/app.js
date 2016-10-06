@@ -300,6 +300,8 @@ GUI.prototype.moveBees = function() {
 
 GUI.prototype.removeAnts = function() {
     di = this.get_deadinsects();
+    console.log("called")
+    console.log(this)
     for (a in di) {
         if ($.inArray(a, this.deadinsects) == -1) {
             //We have some ant killing to do lol -CS
@@ -313,7 +315,8 @@ GUI.prototype.removeAnts = function() {
     }
 }
 GUI.prototype.update = function() {
-    if (gui.is_gameOver()) {
+    console.log(this)
+    if (this.is_gameOver()) {
         clearInterval(this.interval);
         if (gui.get_winner()) {
             swal({
@@ -338,14 +341,14 @@ GUI.prototype.update = function() {
         }
         return;
     }
-    gui.get_gameState();
+    this.get_gameState();
     updateControlPanel();
-    gui.updateTime();
+    this.updateTime();
     updateFoodCount();
-    gui.moveBees();
-    gui.removeAnts();
+    this.moveBees();
+    this.removeAnts();
     $('.active-ant').html("");
-    places = gui.get_places();
+    places = this.get_places();
     for (r in places) {
         if (r == "Hive") {
             continue;

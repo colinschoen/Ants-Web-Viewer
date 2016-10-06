@@ -41,8 +41,10 @@ class GUI:
 
     def __init__(self):
         self.active = True
-        self.state = state.State()
+    
+    def cleanState(self):
         self.initialized = False
+        self.state = state.State()
         self.gameOver = False
         self.colony = None
         self.currentBeeId = 0
@@ -62,8 +64,10 @@ class GUI:
 
     def newGameThread(self):
         print("Trying to start new game")
-        self.__init__() # resets GUI state
         importlib.reload(ants) # resets ants, e.g. with newly implemented Ants
+        self.cleanState() # resets GUI state
+        self.makeHooks()
+
         self.winner = ants.start_with_strategy(gui.args, gui.strategy)
         self.gameOver = True
         self.saveState("winner", self.winner)
@@ -82,7 +86,6 @@ class GUI:
         self.active = False
 
     def initialize_colony_graphics(self, colony):
-
         self.colony = colony
         self.ant_type_selected = -1
         self.saveState("strategyTime", STRATEGY_SECONDS)
@@ -354,7 +357,6 @@ def run(*args):
     PORT = 8000
     global gui
     gui = GUI()
-    gui.makeHooks()
     gui.args = args
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler
