@@ -284,7 +284,9 @@ def update():
     print("Checking for updates...")
     try:
         response = urllib.request.urlopen(request)
-        data = json.loads(response.readall().decode('utf-8'))
+        # TODO: remove the line below when verified
+        # data = json.loads(response.readall().decode('utf-8'))
+        data = json.loads(response.read().decode('utf-8'))
     except urllib.request.URLError as e:
         print('Unable to check for updates')
 
