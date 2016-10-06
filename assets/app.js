@@ -300,8 +300,6 @@ GUI.prototype.moveBees = function() {
 
 GUI.prototype.removeAnts = function() {
     di = this.get_deadinsects();
-    console.log("called")
-    console.log(this)
     for (a in di) {
         if ($.inArray(a, this.deadinsects) == -1) {
             //We have some ant killing to do lol -CS
@@ -315,7 +313,6 @@ GUI.prototype.removeAnts = function() {
     }
 }
 GUI.prototype.update = function() {
-    console.log(this)
     if (this.is_gameOver()) {
         clearInterval(this.interval);
         if (gui.get_winner()) {
