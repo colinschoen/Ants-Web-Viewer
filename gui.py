@@ -41,6 +41,7 @@ class GUI:
 
     def __init__(self):
         self.active = True
+        self.cleanState();
     
     def cleanState(self):
         self.initialized = False
@@ -64,8 +65,8 @@ class GUI:
 
     def newGameThread(self):
         print("Trying to start new game")
-        importlib.reload(ants) # resets ants, e.g. with newly implemented Ants
         self.cleanState() # resets GUI state
+        importlib.reload(ants) # resets ants, e.g. with newly implemented Ants
         self.makeHooks()
 
         self.winner = ants.start_with_strategy(gui.args, gui.strategy)
