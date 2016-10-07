@@ -28,7 +28,6 @@ function updateControlPanel() {
 }
 function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
-    console.log(ants);
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
@@ -265,7 +264,6 @@ $('.places-table').on('click', '.places-td', function() {
                 c = $(t).attr("data-col");
                 if (!gui.locToAnt[r]) gui.locToAnt[r] = [];
                 if(!gui.locToAnt[r][c]){
-                  console.log("r:"+r+"c:"+c);
                   gui.locToAnt[r][c] = [response["id"]];
                 }else{
                   // container
@@ -353,15 +351,13 @@ GUI.prototype.update = function() {
     updateFoodCount();
     this.moveBees();
     this.removeAnts();
-    //$(".active-ant").remove();
-    //$(".contained-ant").remove();
     places = this.get_places();
     for (r in places) {
         if (r == "Hive") {
             continue;
         }
         for (c in places[r]) {
-            if ("type" in places[r][c]["insects"]) {
+            if ("type" in places[r][c]["insects"]) { 
               ant = places[r][c]["insects"];
               antImgTag =  make_img_tag(ant["img"],{"data-id":gui.locToAnt[r][c][0], "class":"active-ant", "container":ant["container"]})
               if(ant["container"] && ant["contains"]){
