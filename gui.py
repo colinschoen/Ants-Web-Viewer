@@ -188,9 +188,19 @@ class GUI:
                     #Add this ant to our internal list of insects
                     self.insects.append(self.insectToId[place.ant])
                 #Ok there is an ant that needs to be drawn here
-                self.places[pRow][pCol]["insects"] = {"id": self.insectToId[place.ant],"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
-                if hasattr(place.ant, "container") and place.ant.container and place.ant.ant:
-                    self.places[pRow][pCol]["insects"]["contains"] = { "type": place.ant.ant.name, "img": self.get_insect_img_file(place.ant.ant.name)}
+                self.places[pRow][pCol]["insects"] = {
+                        "id": self.insectToId[place.ant],
+                        "type": place.ant.name, 
+                        "img": self.get_insect_img_file(place.ant.name)
+                        }
+                # Check if it's a container ant
+                if hasattr(place.ant, "container"):
+                    self.places[pRow][pCol]["insects"]["container"] = place.ant.container
+                    if place.ant.container and place.ant.ant:
+                        self.places[pRow][pCol]["insects"]["contains"] = { 
+                                "type": place.ant.ant.name, 
+                                "img": self.get_insect_img_file(place.ant.ant.name)
+                                }
             else:
                 self.places[pRow][pCol]["insects"] = {}
             #Loop through our bees
