@@ -172,8 +172,6 @@ class GUI:
     def update_food(self):
         self.saveState("food", self.colony.food)
 
-
-
     def _update_control_panel(self, colony):
         """Reflect the game state in the play area."""
         self.update_food()
@@ -191,6 +189,8 @@ class GUI:
                     self.insects.append(self.insectToId[place.ant])
                 #Ok there is an ant that needs to be drawn here
                 self.places[pRow][pCol]["insects"] = {"id": self.insectToId[place.ant],"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
+                if hasattr(place.ant, "container") and place.ant.container and place.ant.ant:
+                    self.places[pRow][pCol]["insects"]["contains"] = { "type": place.ant.ant.name, "img": self.get_insect_img_file(place.ant.ant.name)}
             else:
                 self.places[pRow][pCol]["insects"] = {}
             #Loop through our bees
