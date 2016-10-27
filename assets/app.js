@@ -7,6 +7,7 @@ $.ajaxSetup({
 function GUI() {
     this.oldState;
     this.newState;
+    this.stateInitialised = false;
     this.deadbees = [];
     this.deadinsects = [];
     this.locToAnt = [];
@@ -77,7 +78,7 @@ function updateFoodCount() {
 function startGame() {
     gui = new GUI();
     gui.startGame();
-    gui.get_gameState();
+    gui.get_gameState(false);
     drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
     gui.strategyTime = gui.get_strategyTime();
     gui.interval = setInterval(gui.update.bind(gui), 500);
@@ -95,17 +96,27 @@ GUI.prototype.get_localGameState = function() {
 }
 GUI.prototype.get_gameState = function() {
     t = this;
-    $.post("ajax/fetch/state", function(state) {
+    $.ajax({
+      type: 'POST',
+      url: 'ajax/fetch/state',
+      async: false,
+      success: function(state){
+        if(!gui.initialised) gui.initialised = true
         t.updateState(state);
         return state;
+      }
     })
     .fail(function(xhr, tStatus, e) {
-        swal({
-            title: "Error",
-            text: e,
-            type: "error",
-            showConfirmButton: false,
-            });
+        if(!gui.initialised){
+          setTimeout(gui.get_gameState(async), 500)
+        }else{
+          swal({
+              title: "Error",
+              text: e,
+              type: "error",
+              showConfirmButton: false,
+              });
+        }
     });
 };
 
