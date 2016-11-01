@@ -108,7 +108,7 @@ GUI.prototype.get_gameState = function() {
     })
     .fail(function(xhr, tStatus, e) {
         if(!gui.initialised){
-          setTimeout(gui.get_gameState(async), 500)
+          setTimeout(gui.get_gameState(), 500)
         }else{
           swal({
               title: "Error",
