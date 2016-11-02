@@ -94,6 +94,13 @@ body {
     height: 64px;
 }
 .active-ant {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+}
+
+.contained-ant{
+    position: absolute;
     width: 64px;
     height: 64px;
 }

@@ -8,6 +8,7 @@ import os
 import shutil
 import zipfile
 import threading
+import importlib
 from time import sleep
 from ucb import *
 
@@ -40,8 +41,11 @@ class GUI:
 
     def __init__(self):
         self.active = True
-        self.state = state.State()
+        self.cleanState();
+    
+    def cleanState(self):
         self.initialized = False
+        self.state = state.State()
         self.gameOver = False
         self.colony = None
         self.currentBeeId = 0
@@ -61,11 +65,15 @@ class GUI:
 
     def newGameThread(self):
         print("Trying to start new game")
+        self.cleanState() # resets GUI state
+        importlib.reload(ants) # resets ants, e.g. with newly implemented Ants
+        self.makeHooks()
+
         self.winner = ants.start_with_strategy(gui.args, gui.strategy)
         self.gameOver = True
         self.saveState("winner", self.winner)
         self.saveState("gameOver", self.gameOver)
-        self.killGUI()
+        # self.killGUI()
         update()
 
     def killGUI(self):
@@ -79,7 +87,6 @@ class GUI:
         self.active = False
 
     def initialize_colony_graphics(self, colony):
-
         self.colony = colony
         self.ant_type_selected = -1
         self.saveState("strategyTime", STRATEGY_SECONDS)
@@ -166,8 +173,6 @@ class GUI:
     def update_food(self):
         self.saveState("food", self.colony.food)
 
-
-
     def _update_control_panel(self, colony):
         """Reflect the game state in the play area."""
         self.update_food()
@@ -184,7 +189,19 @@ class GUI:
                     #Add this ant to our internal list of insects
                     self.insects.append(self.insectToId[place.ant])
                 #Ok there is an ant that needs to be drawn here
-                self.places[pRow][pCol]["insects"] = {"id": self.insectToId[place.ant],"type": place.ant.name, "img": self.get_insect_img_file(place.ant.name)}
+                self.places[pRow][pCol]["insects"] = {
+                        "id": self.insectToId[place.ant],
+                        "type": place.ant.name, 
+                        "img": self.get_insect_img_file(place.ant.name)
+                        }
+                # Check if it's a container ant
+                if hasattr(place.ant, "container"):
+                    self.places[pRow][pCol]["insects"]["container"] = place.ant.container
+                    if place.ant.container and place.ant.ant:
+                        self.places[pRow][pCol]["insects"]["contains"] = { 
+                                "type": place.ant.ant.name, 
+                                "img": self.get_insect_img_file(place.ant.ant.name)
+                                }
             else:
                 self.places[pRow][pCol]["insects"] = {}
             #Loop through our bees
@@ -284,7 +301,7 @@ def update():
     print("Checking for updates...")
     try:
         response = urllib.request.urlopen(request)
-        data = json.loads(response.readall().decode('utf-8'))
+        data = json.loads(response.read().decode('utf-8'))
     except urllib.request.URLError as e:
         print('Unable to check for updates')
 
@@ -351,7 +368,6 @@ def run(*args):
     PORT = 8000
     global gui
     gui = GUI()
-    gui.makeHooks()
     gui.args = args
     #Basic HTTP Handler
     #Handler = http.server.SimpleHTTPRequestHandler

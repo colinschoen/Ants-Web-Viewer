@@ -7,6 +7,7 @@ $.ajaxSetup({
 function GUI() {
     this.oldState;
     this.newState;
+    this.stateInitialised = false;
     this.deadbees = [];
     this.deadinsects = [];
     this.locToAnt = [];
@@ -28,7 +29,6 @@ function updateControlPanel() {
 }
 function drawControlPanel(food, places, ants) {
     tr = $('#antsTableRow');
-    console.log(ants);
     for (var id in ants) {
         ant = ants[id];
         if (ant["cost"] > food)
@@ -78,10 +78,10 @@ function updateFoodCount() {
 function startGame() {
     gui = new GUI();
     gui.startGame();
-    gui.get_gameState();
+    gui.get_gameState(false);
     drawControlPanel(gui.get_food(), gui.get_places(), gui.get_antTypes());
     gui.strategyTime = gui.get_strategyTime();
-    gui.interval = setInterval(gui.update, 500);
+    gui.interval = setInterval(gui.update.bind(gui), 500);
 }
 
 GUI.prototype.startGame = function() {
@@ -96,17 +96,27 @@ GUI.prototype.get_localGameState = function() {
 }
 GUI.prototype.get_gameState = function() {
     t = this;
-    $.post("ajax/fetch/state", function(state) {
+    $.ajax({
+      type: 'POST',
+      url: 'ajax/fetch/state',
+      async: false,
+      success: function(state){
+        if(!gui.initialised) gui.initialised = true
         t.updateState(state);
         return state;
+      }
     })
     .fail(function(xhr, tStatus, e) {
-        swal({
-            title: "Error",
-            text: e,
-            type: "error",
-            showConfirmButton: false,
-            });
+        if(!gui.initialised){
+          setTimeout(gui.get_gameState(), 500)
+        }else{
+          swal({
+              title: "Error",
+              text: e,
+              type: "error",
+              showConfirmButton: false,
+              });
+        }
     });
 };
 
@@ -173,8 +183,18 @@ GUI.prototype.get_deadbees = function() {
 GUI.prototype.get_deadinsects = function() {
     return this.newState["deadinsects"];
 }
+GUI.prototype.clearBoard = function(){
+  $(".places-table > tbody").empty();
+}
+GUI.prototype.clearAntTypes = function(){
+  $("#antsTableRow").empty();
+}
 
-
+GUI.prototype.restartGame = function(){
+  this.clearBoard();
+  this.clearAntTypes();
+  startGame();
+}
 
 $('#antsTableRow').on('click', ".ant-row", function() {
     if ($(this).attr('data-disabled') == 1) {
@@ -207,14 +227,13 @@ $("#playBtn").on('click', function() {
 
 $('#exitBtn').on('click', function() {
     clearInterval(gui.interval);
+    $.post("ajax/exit");
     swal({
         title: "Terminated",
         text: "The Web GUI has been killed.",
         type: "warning",
         showConfirmButton: false,
         });
-    $.post("ajax/exit");
-    $.post("ajax/exit");
 });
 
 $('.places-table').on('click', '.places-td', function() {
@@ -252,10 +271,15 @@ $('.places-table').on('click', '.places-td', function() {
             }        
             else {
                 //$(t).find('.tunnel-img-container').html('<img data-id="' + response["id"]  +'" class="active-ant" src="' + selectedAnt["img"]  + '">');
-                if (!gui.locToAnt[$(t).attr("data-row")]) {
-                    gui.locToAnt[$(t).attr("data-row")] = [];
+                r = $(t).attr("data-row");
+                c = $(t).attr("data-col");
+                if (!gui.locToAnt[r]) gui.locToAnt[r] = [];
+                if(!gui.locToAnt[r][c]){
+                  gui.locToAnt[r][c] = [response["id"]];
+                }else{
+                  // container
+                  gui.locToAnt[r][c].unshift(response["id"]);
                 }
-                gui.locToAnt[$(t).attr("data-row")][$(t).attr("data-col")] = response["id"];
                 gui.update();
             }
         });
@@ -282,7 +306,7 @@ GUI.prototype.moveBees = function() {
     for (b in db) {
         if ($.inArray(db[b], this.deadbees) == -1) {
             //We have some bee killing to do
-            img = $('.bee-img[data-id="' + db[b] + '"]').hide("explode", {pieces: 16}, 1000);
+            $('.bee-img[data-id="' + db[b] + '"]').hide("explode", {pieces: 16}, 1000);
             this.deadbees.push(db[b]);
         }
     }
@@ -293,52 +317,99 @@ GUI.prototype.removeAnts = function() {
     for (a in di) {
         if ($.inArray(a, this.deadinsects) == -1) {
             //We have some ant killing to do lol -CS
-            img = $('.places-table').find('.active-ant[data-id="' + di[a] + '"]').hide("explode", {pieces: 16}, 1000).hide();
-            td = img.closest(".ant-td");
-            r = td.attr("data-row");
-            c = td.attr("data-col");
             
+            img = $('.places-table').find('.active-ant[data-id="' + di[a] + '"]')
+            img.hide("explode", {pieces: 16}, 1000);
+            if(img[0]){
+              td = img[0].closest("td");
+              r = $(td).attr("data-row");
+              c = $(td).attr("data-col");
+              gui.locToAnt[r][c].shift(); 
+            }
             this.deadinsects.push(di[a]);
         }
     }
 }
 GUI.prototype.update = function() {
-    if (gui.is_gameOver()) {
+    if (this.is_gameOver()) {
         clearInterval(this.interval);
         if (gui.get_winner()) {
             swal({
                 title: "Congratulations",
                 text: "You successfully defeated the bees!",
                 type: "success",
-                showConfirmButton: false,
-            });
-        }
-        else {
+                confirmButtonColor: "#0b752b",
+                confirmButtonText: "Restart?"
+              },
+              this.restartGame.bind(this)
+            );
+        } else {
             swal({
                 title: "Tough Luck",
                 text: "You lost and the bees live on.",
                 type: "warning",
-                showConfirmButton: false,
-            });
+                confirmButtonColor: "#0b752b",
+                confirmButtonText: "Restart?"
+              },
+              this.restartGame.bind(this)
+            );
         }
         return;
     }
-    gui.get_gameState();
+    this.get_gameState();
     updateControlPanel();
-    gui.updateTime();
+    this.updateTime();
     updateFoodCount();
-    gui.moveBees();
-    gui.removeAnts();
-    $('.active-ant').html("");
-    places = gui.get_places();
+    this.moveBees();
+    this.removeAnts();
+    places = this.get_places();
     for (r in places) {
         if (r == "Hive") {
             continue;
         }
         for (c in places[r]) {
-            if ("type" in places[r][c]["insects"]) {
-                $('.places-table').find('.places-td[data-row="' + r  + '"][data-col="' + c  + '"]').find('.tunnel-img-container').html('<img data-id="' + gui.locToAnt[r][c]  + '" class="active-ant" src="' + places[r][c]["insects"]["img"]  + '">');
+            if ("type" in places[r][c]["insects"]) { 
+              ant = places[r][c]["insects"];
+              antImgTag =  make_img_tag(ant["img"],{"data-id":gui.locToAnt[r][c][0], "class":"active-ant", "container":ant["container"]})
+              if(ant["container"] && ant["contains"]){
+                antImgTag = make_img_tag(places[r][c]["insects"]["contains"]["img"], {"class":"contained-ant"}) + antImgTag;
+              }
+              $('.places-table').find('.places-td[data-row="' + r  + '"][data-col="' + c  + '"]').find('.tunnel-img-container').html(antImgTag);
             }
         }
     }
+}
+
+GUI.prototype.fireOff = function(){
+  beeLocations = this.get_beeLocations();
+  beeGrid = []
+  places = this.oldState.places;
+  height = keys(places).length - 1;
+  width = keys(places['0'].length);
+  ants = [];
+  for(var i = 0; i < height; ++i){
+    beeGrid.push(new Array(width));
+  }
+  for(var i = 0; i < beeLocations.length; ++i){
+    location = beeLocations[i].split('_');
+    beeGrid[ location[1] ][ location[2] ] = true;
+  }
+  for(var i = 0; i < height; ++i){
+    for(var j = 0; j < width; ++j){
+      ants = location[i+""][j+""]["insects"];
+    }
+  }
+}
+
+// particles.js
+function shoot_from(a, b){
+  console.log("fired from " + a + " to " + b);
+}
+
+//utils.js
+function make_img_tag(src, attributes){
+  tag = "<img src = '" + src + "'";
+  for(var attr in attributes) tag += ' ' + attr + " = " + attributes[attr];
+  tag += ">"
+  return tag
 }
